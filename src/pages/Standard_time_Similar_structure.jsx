@@ -12,6 +12,7 @@ import DialogTitle from "@mui/material/DialogTitle";
 import InfoIcon from "@mui/icons-material/Info";
 import { saveAs } from "file-saver";
 import ExcelJS from "exceljs";
+import Swal from 'sweetalert2';
 
 export default function StandardTimeSimilarStructure() {
   // -------------------- State --------------------
@@ -101,6 +102,7 @@ export default function StandardTimeSimilarStructure() {
     setProductInput("");
     setSelectedProcess(null);
     setProcessInput("");
+    setTableData([]);
   };
 
   const handleCloseDialog = () => {
@@ -109,10 +111,12 @@ export default function StandardTimeSimilarStructure() {
 
   const handleSearch = async () => {
     if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
-      setDialog({
-        open: true,
-        message: "กรุณาเลือก Product หรือ Process",
-        severity: "warning",
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Please Select Data',
+        text: 'Please select Product or Process at least 1 option',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#3085d6'
       });
       return;
     }
