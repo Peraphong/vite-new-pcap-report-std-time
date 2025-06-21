@@ -129,7 +129,7 @@ export default function StandardTimeReportByProduct() {
     if (allAreAll) {
       Swal.fire({
         icon: 'warning',
-        title: 'กรุณาเลือก Factory อย่างน้อย 1 ค่า',
+        title: 'Please select at least one Factory',
         confirmButtonText: 'OK'
       });
       return;
