@@ -15,13 +15,7 @@ import { styled } from "@mui/material/styles";
 import axios from "axios";
 import Autocomplete from "@mui/material/Autocomplete";
 import TextField from "@mui/material/TextField";
-import Dialog from '@mui/material/Dialog';
-import DialogTitle from '@mui/material/DialogTitle';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import Button from '@mui/material/Button';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import Swal from 'sweetalert2';
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "./styles/Standard_Time_Report_By_Product.sticky.css";
@@ -80,8 +74,6 @@ export default function StandardTimeReportByProduct() {
   });
   const [searchError, setSearchError] = useState("");
   const [tableData, setTableData] = useState([]);
-  const [openDialog, setOpenDialog] = useState(false);
-  const [dialogMsg, setDialogMsg] = useState("");
   const [loading, setLoading] = useState(false);
   // Pagination
   const [page, setPage] = useState(1);
@@ -135,8 +127,11 @@ export default function StandardTimeReportByProduct() {
       return val === 'ALL';
     });
     if (allAreAll) {
-      setDialogMsg("กรุณาเลือก Factory อย่างน้อย 1 ค่า");
-      setOpenDialog(true);
+      Swal.fire({
+        icon: 'warning',
+        title: 'กรุณาเลือก Factory อย่างน้อย 1 ค่า',
+        confirmButtonText: 'OK'
+      });
       return;
     }
     setSearchError("");
@@ -158,8 +153,11 @@ export default function StandardTimeReportByProduct() {
       setTotal(res.data.total || (Array.isArray(res.data.rows) ? res.data.rows.length : 0));
     } catch (err) {
       setTableData([]);
-      setDialogMsg("เกิดข้อผิดพลาดในการดึงข้อมูล");
-      setOpenDialog(true);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+        confirmButtonText: 'OK'
+      });
     } finally {
       setLoading(false);
     }
@@ -780,19 +778,6 @@ export default function StandardTimeReportByProduct() {
           </div>
         </div>
       </Box>
-
-      {/* แจ้งเตือน Dialog */}
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
-        <DialogTitle sx={{display:'flex',alignItems:'center',gap:1}}>
-          <InfoOutlinedIcon color="info" /> แจ้งเตือน
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText sx={{fontSize:20,fontWeight:500}}>{dialogMsg}</DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenDialog(false)} autoFocus variant="contained">OK</Button>
-        </DialogActions>
-      </Dialog>
     </>
   );
 }

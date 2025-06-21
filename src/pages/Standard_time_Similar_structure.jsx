@@ -308,7 +308,7 @@ export default function StandardTimeSimilarStructure() {
 
     // Data
     if (!tableData || tableData.length === 0) {
-      worksheet.addRow(["", "", "", "", "", "", "ไม่มีข้อมูล"]);
+      worksheet.addRow(["", "", "", "", "", "", "NO DATA"]);
     } else {
       tableData.forEach((row) => {
         worksheet.addRow([
