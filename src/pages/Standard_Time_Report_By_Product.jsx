@@ -679,7 +679,7 @@ export default function StandardTimeReportByProduct() {
                 </thead>
                 <tbody>
                   {tableData.length === 0 ? (
-                    <tr><td colSpan={24} style={{textAlign:'center',color:'#888',fontSize:25}}>ไม่พบข้อมูล</td></tr>
+                    <tr><td colSpan={24} style={{textAlign:'center',color:'#888',fontSize:25}}>NO DATA</td></tr>
                   ) : (
                     tableData.map((row, idx) => (
                       <tr key={idx}>
