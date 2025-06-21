@@ -620,7 +620,7 @@ export default function StandardTimeSimilarStructure() {
                       colSpan={7}
                       style={{ textAlign: "center", color: "#aaa" }}
                     >
-                      ไม่มีข้อมูล
+                      No DATA
                     </td>
                   </tr>
                 )}
