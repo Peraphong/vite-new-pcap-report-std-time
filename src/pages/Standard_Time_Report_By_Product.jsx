@@ -458,16 +458,17 @@ export default function StandardTimeReportByProduct() {
                 </FormControl>
                 {/* Row 2 */}
                 <FormControl size="small" sx={{ minWidth: 300 }}>
-                  <InputLabel>Process</InputLabel>
-                  <Select
-                    value={filters.process}
-                    label="Process"
-                    onChange={(e) => handleFilterChange('process', e.target.value)}
-                  >
-                    {lists.processList.map((item, idx) => (
-                      <MenuItem key={idx} value={item.value}>{item.label}</MenuItem>
-                    ))}
-                  </Select>
+                  <Autocomplete
+                    size="small"
+                    options={lists.processList}
+                    getOptionLabel={option => option.label || ""}
+                    value={lists.processList.find(item => item.value === filters.process) || null}
+                    onChange={(_, newValue) => handleFilterChange('process', newValue ? newValue.value : "ALL")}
+                    renderInput={(params) => <TextField {...params} label="Process" />}
+                    disableClearable
+                    isOptionEqualToValue={(option, value) => option.value === value.value}
+                    ListboxProps={{ style: { maxHeight: 300 } }}
+                  />
                 </FormControl>
                 <FormControl size="small" sx={{ minWidth: 300 }}>
                   <Autocomplete
