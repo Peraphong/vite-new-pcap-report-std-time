@@ -1,0 +1,223 @@
+.login-bg {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #e3f0ff 0%, #b3d8f8 100%);
+  background-size: 400% 400%;
+  animation: gradientBG 15s ease infinite;
+}
+
+.login-bg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("https://www.transparenttextures.com/patterns/triangular.png"),
+    linear-gradient(
+      45deg,
+      rgba(255, 255, 255, 0.06) 25%,
+      transparent 25%,
+      transparent 50%,
+      rgba(255, 255, 255, 0.06) 50%,
+      rgba(255, 255, 255, 0.06) 75%,
+      transparent 75%,
+      transparent
+    );
+  background-size: 60px 60px, 80px 80px;
+  background-blend-mode: overlay;
+  opacity: 0.25; /* ให้ลาย "พอมองเห็นได้ชัดขึ้น" */
+  z-index: 0;
+}
+
+@keyframes gradientBG {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.login-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 150%;
+  height: 730px;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 80%;
+  filter: blur(3px);
+  background: radial-gradient(ellipse at bottom, #42a5f5 0%, transparent 100%);
+  animation: waveAnim 8s ease-in-out infinite alternate;
+}
+.login-bg-wave svg {
+  width: 100vw;
+  height: 260px;
+  display: block;
+}
+
+
+@keyframes waveAnim {
+  0% {
+    transform: translateY(0px) scale(1);
+  }
+  100% {
+    transform: translateY(-10px) scale(1.02);
+  }
+}
+
+.login-container {
+  position: relative;
+  z-index: 1;
+  background: rgba(255, 255, 255, 100%);
+  border-radius: 24px;
+  box-shadow: 0 8px 28px rgba(31, 38, 135, 0.18),
+    0 4px 12px rgba(80, 120, 200, 0.15);
+  padding: 36px 38px;
+  width: 400px; /* ลดขนาดลง */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(200, 220, 255, 0.28);
+  transition: all 0.3s ease;
+  animation: login-fade-in-up 1s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.login-container:hover {
+  box-shadow: 0 10px 32px rgba(31, 38, 135, 0.25),
+    0 0 50px rgba(66, 165, 245, 0.15);
+  transform: scale(1.01);
+}
+
+.Fujikura-Logo-main {
+  width: 280px; /* ลดลงตามขนาด container */
+  margin-bottom: 10px;
+}
+
+.Fujikura-Logo {
+  width: 260px;
+  height: auto;
+  display: block;
+  margin: -22% auto -50px auto;
+}
+
+.login-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-align: center;
+  text-transform: uppercase;
+  margin-bottom: 0.3rem;
+  background: linear-gradient(90deg, #0d47a1 30%, #42a5f5 70%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 2px 12px rgba(26, 41, 128, 0.10), 0 1px 0 #000000;
+}
+
+.login-subtitle {
+  color: #1976d2;
+  font-size: 1.22rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  letter-spacing: 1.1px;
+  text-align: center;
+  text-shadow: 0 1px 8px #e0f5ff;
+  text-transform: uppercase;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.MuiTextField-root {
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(31, 38, 135, 0.09);
+}
+
+.MuiOutlinedInput-root {
+  font-size: 1.08rem;
+  font-family: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
+  color: #0d47a1;
+  border-radius: 10px;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #b3d8f8 !important;
+}
+
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #1976d2 !important;
+}
+
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #42a5f5 !important;
+}
+
+.login-container .MuiButton-root,
+.login-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 1.13rem;
+  font-family: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
+  border-radius: 14px;
+  margin-top: 20px;
+  background: linear-gradient(90deg, #1976d2 0%, #1e88e5 100%);
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  box-shadow: 0 4px 18px rgba(25, 118, 210, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32);
+  color: #fff;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-shadow: 0 1px 8px #1976d2;
+}
+
+.login-container .MuiButton-root:hover,
+.login-btn:hover {
+  background: linear-gradient(90deg, #125ea2 0%, #1565c0 100%);
+  box-shadow: 0 6px 24px rgba(18, 94, 162, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.38);
+  color: #fff;
+}
+
+body,
+.login-title,
+.login-subtitle {
+  font-family: 'Inter', 'Poppins', 'Segoe UI', Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 600px) {
+  .login-container {
+    width: 94vw;
+    padding: 22px 8px;
+    min-width: unset;
+    max-width: 96vw;
+  }
+  .login-logo-main {
+    width: 200px;
+  }
+}
+
+@keyframes login-fade-in-up {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.98);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}

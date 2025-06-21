@@ -1,0 +1,3 @@
+prd_name,mat_item,mat_type,stock_lot,stock_pcs,expire_lot,expire_pcs,
+RGP-XXX,1016XXXX,Leaf,1.1,10000,0,0,Example.
+RGPZ-XXX,1016XXXX,Leaf,0,0,0.5,500,Example.

@@ -1,0 +1,35 @@
+select, .MuiOutlinedInput-root {
+  border: 1.5px solid #111 !important;
+  color: #111 !important;
+}
+
+.MuiOutlinedInput-notchedOutline {
+  border-color: #111 !important;
+}
+
+.MuiInputBase-input, .MuiSelect-select {
+  color: #111 !important;
+}
+
+label, .MuiInputLabel-root {
+  color: #111 !important;
+}
+
+.MuiOutlinedInput-root, .MuiOutlinedInput-root:hover, .MuiOutlinedInput-root.Mui-focused {
+  border: 1.5px solid #111 !important;
+}
+
+.MuiOutlinedInput-notchedOutline, .MuiOutlinedInput-notchedOutline:hover, .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #111 !important;
+}
+
+.MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline,
+.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline,
+.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #000 !important;
+  border-width: 2px !important;
+}
+
+.MuiOutlinedInput-root {
+  border-radius: 8px !important;
+}
