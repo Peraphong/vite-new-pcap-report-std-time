@@ -1,5 +1,5 @@
 // ======================= Imports =======================
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import Navbar from "../components/navbar/Navbar";
 import Box from "@mui/material/Box";
 import InputLabel from "@mui/material/InputLabel";
@@ -20,33 +20,87 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "./styles/Standard_Time_Report_By_Product.sticky.css";
 
+// ======================= Global Styles for Fixing Button Visibility =======================
+// Add CSS to fix hidden button issues
+const globalStyles = `
+  .swal2-popup button {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  .swal2-confirm {
+    opacity: 1 !important;
+    visibility: visible !important;
+    background-color: #3085d6 !important;
+    color: white !important;
+    border: none !important;
+    display: inline-block !important;
+  }
+  
+  .swal2-confirm:hover {
+    opacity: 0.9 !important;
+    background-color: #2370c0 !important;
+  }
+  
+  /* Hide Cancel and No buttons */
+  .swal2-cancel,
+  .swal2-deny {
+    display: none !important;
+  }
+  
+  /* Fix hidden buttons on the web */
+  button[aria-label] {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+`;
+
+// เพิ่ม styles เข้าไปใน document head
+if (typeof document !== 'undefined') {
+  const styleSheet = document.createElement("style");
+  styleSheet.type = "text/css";
+  styleSheet.innerText = globalStyles;
+  document.head.appendChild(styleSheet);
+}
+
 // ======================= Styled Components =======================
 const CircleButton = styled(IconButton)(({ btntype }) => ({
   borderRadius: "50%",
-  width: 35, // ขยายขนาดปุ่ม
-  height: 35, // ขยายขนาดปุ่ม
+  width: 42,
+  height: 42,
   margin: 5,
-  boxShadow: "0 2px 12px 0 rgba(255, 255, 255, 0.1)",
+  boxShadow: "0 4px 12px 0 rgba(0, 0, 0, 0.3) !important",
   background: 
     btntype === "search"
-      ? "#42a5f5"
+      ? "#42a5f5 !important"
       : btntype === "clear"
-      ? "#ef5350"
+      ? "#ef5350 !important"
       : btntype === "excel"
-      ? "#43a047"
-      : "#29b6f6",
-  display: "flex",
+      ? "#43a047 !important"
+      : "#29b6f6 !important",
+  display: "flex !important",
   alignItems: "center",
   justifyContent: "center",
   transition: "transform 0.18s cubic-bezier(.4,2,.6,1), box-shadow 0.18s",
+  opacity: "1 !important",
+  visibility: "visible !important",
+  border: "2px solid rgba(255, 255, 255, 0.2) !important",
   "&:hover": {
-    transform: "scale(1.18)",
-    boxShadow: "0 6px 24px 0 rgba(255, 255, 255, 0.18)",
-    opacity: 0.93,
+    transform: "scale(1.12) !important",
+    boxShadow: "0 6px 20px 0 rgba(0, 0, 0, 0.4) !important",
+    opacity: "1 !important",
+  },
+  "&:focus": {
+    opacity: "1 !important",
+    outline: "none !important",
+  },
+  "&:active": {
+    transform: "scale(0.95) !important",
+    opacity: "1 !important",
   },
 }));
 
-// ย้าย allUnitsMock ออกนอก component เพื่อไม่ให้เป็น dependency
+// Move allUnitsMock outside the component to avoid being a dependency
 const allUnitsMock = [
   "BLK", "CFM", "CVC", "ELT", "FIN", "INT", "LAM", "MAS", "MOT", "OTH", "PTH", "QA", "SFT", "W/H"
 ];
@@ -77,18 +131,19 @@ export default function StandardTimeReportByProduct() {
   const [loading, setLoading] = useState(false);
   // Pagination
   const [page, setPage] = useState(1);
-  const [pageSize, setPageSize] = useState(20); // เปลี่ยนค่า default เป็น 20
+  const [pageSize, setPageSize] = useState(20); // Change default value to 20
   const [total, setTotal] = useState(0);
+  const [jumpPageInput, setJumpPageInput] = useState('');
 
   // ---------- Handlers ----------
   const handleNavbarToggle = (openStatus) => setIsNavbarOpen(openStatus);
 
-  // ใช้ฟังก์ชันเดียวสำหรับเปลี่ยน filter ทุกช่อง
+  // Use a single function to change all filter fields
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  // รีเซ็ตค่าทุกช่องค้นหา
+  // Reset all search fields
   const handleRefresh = () => {
     setFilters({
       factory: "ALL",
@@ -101,7 +156,7 @@ export default function StandardTimeReportByProduct() {
     });
   };
 
-  // รีเซ็ตค่าทุกช่องค้นหาและล้างตาราง
+  // Reset all search fields and clear table
   const handleClearAll = () => {
     setFilters({
       factory: "ALL",
@@ -155,7 +210,7 @@ export default function StandardTimeReportByProduct() {
       setTableData([]);
       Swal.fire({
         icon: 'error',
-        title: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+        title: 'An error occurred while fetching data',
         confirmButtonText: 'OK'
       });
     } finally {
@@ -163,51 +218,211 @@ export default function StandardTimeReportByProduct() {
     }
   };
 
-  // Export table to Excel (with header color, exceljs)
+  const formatETA = (sec) => {
+    if (sec <= 0) return 'Summarizing...';
+    if (sec < 60) return `About ${sec} seconds left`;
+    const min = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `About ${min} minute${min > 1 ? 's' : ''}${s > 0 ? ' ' + s + ' seconds' : ''} left`;
+  };
+  // --- handleExportExcel: export Excel ถ้าไม่เกิน 120,000 rows ---
   const handleExportExcel = async () => {
-    if (!tableData || tableData.length === 0) return;
+    // Load 10,000 records per page until all pages are loaded (no maximum limit)
+    const params = {
+      factory: filters.factory === 'ALL' ? '' : filters.factory,
+      unit: filters.unit === 'ALL' ? '' : filters.unit,
+      group: filters.groupProcess === 'ALL' ? '' : filters.groupProcess,
+      process: filters.process === 'ALL' ? '' : filters.process,
+      product_from: filters.productFrom === 'ALL' ? '' : filters.productFrom,
+      product_to: filters.productTo === 'ALL' ? '' : filters.productTo,
+      std_type: filters.stdType === 'ALL' ? '' : filters.stdType,
+      page: 1,
+      pageSize: 10000 // 10,000 ต่อ page
+    };
+    let allRows = [];
+    let totalRows = 0;
+    let maxPage = 1;
+    try {
+      Swal.fire({
+        title: '<span style="font-size:2rem;font-weight:700;color:#1976d2;letter-spacing:1px;">Exporting...</span>',
+        html: `<div style="margin:20px 0;color:#1976d2;">Loading data...</div>`,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+      // Load first page
+      const res = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params });
+      const rows = Array.isArray(res.data.rows) ? res.data.rows : [];
+      totalRows = res.data.total || rows.length;
+      allRows = rows;
+      maxPage = Math.ceil(totalRows / params.pageSize);
+      // Load data page by page
+      for (let p = 2; p <= maxPage; p++) {
+        const resPage = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params: { ...params, page: p } });
+        const rowsPage = Array.isArray(resPage.data.rows) ? resPage.data.rows : [];
+        allRows = allRows.concat(rowsPage);
+        if (rowsPage.length === 0) break;
+      }
+      Swal.close();
+      if (allRows.length === 0) {
+        Swal.fire({ icon: 'info', title: 'No data to export', confirmButtonText: 'OK' });
+        return;
+      }
+      // Export Excel
+      await createExcelFile(allRows, "Standard_Time_Report.xlsx");
+      Swal.fire({
+        icon: 'success',
+        title: 'Export successful!',
+        text: `Exported ${allRows.length.toLocaleString()} rows`,
+        confirmButtonText: 'OK'
+      });
+      return;
+    } catch (err) {
+      Swal.close();
+      Swal.fire({ icon: 'error', title: 'Export failed', text: 'An error occurred while exporting data', confirmButtonText: 'OK' });
+    }
+  };
+
+  // --- Export CSV ถ้าเกิน 120,000 rows พร้อม progress bar ---
+  const handleExportCSV = async () => {
+    const params = {
+      factory: filters.factory === 'ALL' ? '' : filters.factory,
+      unit: filters.unit === 'ALL' ? '' : filters.unit,
+      group: filters.groupProcess === 'ALL' ? '' : filters.groupProcess,
+      process: filters.process === 'ALL' ? '' : filters.process,
+      product_from: filters.productFrom === 'ALL' ? '' : filters.productFrom,
+      product_to: filters.productTo === 'ALL' ? '' : filters.productTo,
+      std_type: filters.stdType === 'ALL' ? '' : filters.stdType,
+      page: 1,
+      pageSize: 10000
+    };
+    let allRows = [];
+    let totalRows = 0;
+    let maxPage = 1;
+    try {
+      // เตรียม progress bar (ดีไซน์ใหม่ ตรงกลาง)
+      Swal.fire({
+        title: '<span style="font-size:2rem;font-weight:700;color:#1976d2;letter-spacing:1px;">Exporting CSV...</span>',
+        html:
+          `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:8px 0 0 0;">` +
+            `<div id="swal-csv-progress-bar" style="width:320px;max-width:90vw;background:#e3e7f7;border-radius:16px;height:22px;overflow:hidden;box-shadow:0 2px 8px #b3b3e6 inset;">`+
+              `<div id="swal-csv-progress-inner" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 0%,#42a5f5 100%);transition:width 0.4s;border-radius:16px;"></div>`+
+            `</div>`+
+            `<div id="swal-csv-progress-text" style="font-size:1.15rem;color:#1976d2;font-weight:600;text-shadow:0 1px 0 #fff;margin-top:12px;text-align:center;width:100%;">Loading data...</div>`+
+            `<div id="swal-csv-rowcount-text" style="font-size:1.05rem;color:#1976d2;font-weight:500;margin-top:2px;text-align:center;width:100%;"></div>`+
+          `</div>`,
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showConfirmButton: false,
+        didOpen: () => { Swal.showLoading(); }
+      });
+      // Load first page
+      const res = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params });
+      const rows = Array.isArray(res.data.rows) ? res.data.rows : [];
+      totalRows = res.data.total || rows.length;
+      allRows = rows;
+      maxPage = Math.ceil(totalRows / params.pageSize);
+      // อัปเดต progress
+      let percent = Math.min(100, Math.round((1 / maxPage) * 100));
+      document.getElementById('swal-csv-progress-inner').style.width = percent + '%';
+      document.getElementById('swal-csv-progress-text').innerText = `Page 1 / ${maxPage} (${percent}%)`;
+      document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${allRows.length.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+      for (let p = 2; p <= maxPage; p++) {
+        const resPage = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params: { ...params, page: p } });
+        const rowsPage = Array.isArray(resPage.data.rows) ? resPage.data.rows : [];
+        allRows = allRows.concat(rowsPage);
+        if (rowsPage.length === 0) break;
+        percent = Math.min(100, Math.round((p / maxPage) * 100));
+        document.getElementById('swal-csv-progress-inner').style.width = percent + '%';
+        document.getElementById('swal-csv-progress-text').innerText = `Page ${p} / ${maxPage} (${percent}%)`;
+        document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${allRows.length.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+      }
+      Swal.close();
+      if (allRows.length === 0) {
+        Swal.fire({ icon: 'info', title: 'No data to export', confirmButtonText: 'OK' });
+        return;
+      }
+      // Export CSV
+      await createCSVFile(allRows, "Standard_Time_Report.csv");
+      Swal.fire({
+        icon: 'success',
+        title: 'Export successful!',
+        text: `Exported ${allRows.length.toLocaleString()} rows (CSV)`,
+        confirmButtonText: 'OK'
+      });
+      return;
+    } catch (err) {
+      Swal.close();
+      Swal.fire({ icon: 'error', title: 'Export failed', text: 'An error occurred while exporting CSV', confirmButtonText: 'OK' });
+    }
+  };
+
+  // --- สร้างไฟล์ CSV ---
+  const createCSVFile = async (rows, filename) => {
     const headers = [
       "Product Name", "Seq", "Process", "Factory", "Unit", "Wc", "Formula Group", "Sht.Width", "Sht.Len", "Sht./Lot", "Pcs/Sht", "Pcs/Lot", "Min./Lot", "Sec/Sht.", "Sec/Pcs.", "UPH", "Create By", "Create Date", "Update By", "Update Date", "Prd Forecast", "Prd Wip", "Prd Stdtime", "Remark"
     ];
     const keys = [
       "prd_name", "ro_seq", "proc_disp", "factory_desc", "fac_unit_desc", "wc", "grp_name", "ro_sht_width", "ro_sht_length", "ro_sht_lot", "ro_pcs_sht", "pcs_lot", "min_lot", "sec_sheet", "sec_pcs", "uph", "create_by", "create_date", "update_by", "update_date", "prd_forecast", "prd_wip", "prd_stdtime", "remark"
     ];
+    let csv = '';
+    csv += headers.join(',') + '\r\n';
+    for (const row of rows) {
+      const line = keys.map(key => {
+        let value = row[key];
+        if (typeof value === 'undefined' || value === null) value = '';
+        if (typeof value === 'string') value = '"' + value.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ') + '"';
+        return value;
+      }).join(',');
+      csv += line + '\r\n';
+    }
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+      navigator.msSaveBlob(blob, filename);
+    } else {
+      const link = document.createElement('a');
+      if (link.download !== undefined) {
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    }
+  };
+
+  // --- สร้างไฟล์ Excel ---
+  const createExcelFile = async (rows, filename) => {
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Report");
-    // Add header row
+    const worksheet = workbook.addWorksheet('Report');
+    const headers = [
+      "Product Name", "Seq", "Process", "Factory", "Unit", "Wc", "Formula Group", "Sht.Width", "Sht.Len", "Sht./Lot", "Pcs/Sht", "Pcs/Lot", "Min./Lot", "Sec/Sht.", "Sec/Pcs.", "UPH", "Create By", "Create Date", "Update By", "Update Date", "Prd Forecast", "Prd Wip", "Prd Stdtime", "Remark"
+    ];
+    const keys = [
+      "prd_name", "ro_seq", "proc_disp", "factory_desc", "fac_unit_desc", "wc", "grp_name", "ro_sht_width", "ro_sht_length", "ro_sht_lot", "ro_pcs_sht", "pcs_lot", "min_lot", "sec_sheet", "sec_pcs", "uph", "create_by", "create_date", "update_by", "update_date", "prd_forecast", "prd_wip", "prd_stdtime", "remark"
+    ];
     worksheet.addRow(headers);
-    // Add data rows
-    tableData.forEach(row => {
-      worksheet.addRow(keys.map(k => row[k] ?? ""));
+    rows.forEach(row => {
+      worksheet.addRow(keys.map(key => row[key] ?? ''));
     });
-    // Style header row
-    worksheet.getRow(1).eachCell(cell => {
-      cell.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFB7E1FC' } // ฟ้าอ่อน
-      };
-      cell.font = { bold: true };
-      cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      cell.border = {
-        top: { style: 'thin' },
-        left: { style: 'thin' },
-        bottom: { style: 'thin' },
-        right: { style: 'thin' }
-      };
+    worksheet.columns.forEach(col => {
+      col.width = 16;
     });
-    // Auto width columns
-    headers.forEach((h, idx) => {
-      let maxLen = h.length;
-      tableData.forEach(row => {
-        const val = row[keys[idx]] ? String(row[keys[idx]]) : '';
-        if (val.length > maxLen) maxLen = val.length;
-      });
-      worksheet.getColumn(idx + 1).width = Math.max(10, Math.min(maxLen + 2, 30));
-    });
-    // Export
     const buffer = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }), "Standard_Time_Report.xlsx");
+    const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(blob, filename);
+  };
+
+  // === Smart Export Handler - export CSV ทุกกรณี ===
+  const handleSmartExport = async () => {
+    try {
+      await handleExportCSV();
+    } catch (err) {
+      Swal.fire({ icon: 'error', title: 'An error occurred', text: 'Unable to export CSV', confirmButtonText: 'OK' });
+    }
   };
 
   // ---------- Effects ----------
@@ -252,7 +467,7 @@ export default function StandardTimeReportByProduct() {
         setLists((prev) => ({ ...prev, unitList: [{ value: "ALL", label: "ALL" }] }));
         setFilters((prev) => ({ ...prev, unit: "ALL" }));
       });
-  }, [filters.factory]);
+  }, [filters.factory, filters.unit]);
 
   useEffect(() => {
     const apiFactory = (!filters.factory || filters.factory === "ALL") ? "ALL" : filters.factory;
@@ -290,7 +505,7 @@ export default function StandardTimeReportByProduct() {
         setLists((prev) => ({ ...prev, groupProcessList: [{ value: "ALL", label: "ALL" }] }));
         setFilters((prev) => ({ ...prev, groupProcess: "ALL" }));
       });
-  }, [filters.factory, filters.unit]);
+  }, [filters.factory, filters.unit, filters.groupProcess]);
 
   useEffect(() => {
     const apiFactory = (!filters.factory || filters.factory === "ALL") ? "ALL" : filters.factory;
@@ -312,7 +527,7 @@ export default function StandardTimeReportByProduct() {
         setLists((prev) => ({ ...prev, processList: [{ value: "ALL", label: "ALL" }] }));
         setFilters((prev) => ({ ...prev, process: "ALL" }));
       });
-  }, [filters.factory, filters.unit, filters.groupProcess]);
+  }, [filters.factory, filters.unit, filters.groupProcess, filters.process]);
 
   useEffect(() => {
     const apiFactory = (!filters.factory || filters.factory === "ALL") ? "ALL" : filters.factory;
@@ -366,7 +581,7 @@ export default function StandardTimeReportByProduct() {
             minHeight: "650px",
             width: '100vw',
             borderRadius: 16,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
+            boxShadow: "0 2px 12px 0 rgba(0,0,0,0.07)",
             overflow: "hidden",
             padding: 0,
             margin: 0,
@@ -375,13 +590,13 @@ export default function StandardTimeReportByProduct() {
             right: 0,
           }}
         >
-          {/* Header Bar Section (ฟ้าอ่อน ครอบทุกอย่าง) */}
+          {/* Header Bar Section (light blue, covers everything) */}
           <div
             style={
               {
                 width: "100%",
                 height: 150,
-                background: "linear-gradient(90deg,rgba(255, 255, 255, 0.5) 0%,rgba(255, 255, 255, 0.65) 100%)", // ไล่สีฟ้าอ่อน-ขาว
+                background: "linear-gradient(90deg,rgba(255, 255, 255, 0.5) 0%,rgba(255, 255, 255, 0.65) 100%)", // light blue-white gradient
                 borderRadius: "16px 16px 0 0",
                 padding: "20px 24px 0px 24px",
                 boxShadow: "0 4px 16px 0 rgba(33,150,243,0.10)",
@@ -399,7 +614,7 @@ export default function StandardTimeReportByProduct() {
                 alignItems: "flex-start",
                 gap: 34,
                 width: '100%',
-                justifyContent: 'space-between', // ปรับให้ซ้าย-ขวา
+                justifyContent: 'space-between', // left-right alignment
               }}
             >
               {/* --- Left Fields Group --- */}
@@ -410,9 +625,9 @@ export default function StandardTimeReportByProduct() {
                   gap: 26,
                   rowGap: 20,
                   minWidth: 600,
-                  justifyContent: 'flex-end', // ขยับ grid ไปขวา
+                  justifyContent: 'flex-end', // move grid to the right
                   width: '100%',
-                  marginLeft: '29%', // ช่วยดันไปขวา
+                  marginLeft: '29%', // push to the right
                   maxWidth: 900,
                 }}
               >
@@ -605,7 +820,7 @@ export default function StandardTimeReportByProduct() {
                   <CircleButton btntype="clear" aria-label="clear" onClick={handleClearAll}>
                     <img src="/clear1.png" alt="clear" width={36} height={36} style={{maxWidth:36,maxHeight:36}} />
                   </CircleButton>
-                  <CircleButton btntype="excel" aria-label="excel" onClick={handleExportExcel}>
+                  <CircleButton btntype="excel" aria-label="excel" onClick={handleSmartExport}>
                     <img src="/excel.png" alt="excel" width={36} height={36} style={{maxWidth:36,maxHeight:36}} />
                   </CircleButton>
                   <CircleButton btntype="refresh" aria-label="refresh" onClick={handleRefresh}>
@@ -626,10 +841,10 @@ export default function StandardTimeReportByProduct() {
             textAlign: 'left',
             paddingLeft: 12
           }}>
-            Product From: {filters.productFrom !== 'ALL' ? filters.productFrom : '-'} &nbsp; ถึง &nbsp; Product To: {filters.productTo !== 'ALL' ? filters.productTo : '-'}
+            Product From: {filters.productFrom !== 'ALL' ? filters.productFrom : '-'} &nbsp; to &nbsp; Product To: {filters.productTo !== 'ALL' ? filters.productTo : '-'}
           </div>
           {loading && (
-            <div style={{textAlign:'center',margin:'20px',fontSize:'20px',color:'#1976d2'}}>กำลังโหลดข้อมูล...</div>
+            <div style={{textAlign:'center',margin:'20px',fontSize:'20px',color:'#1976d2'}}>Loading data...</div>
           )}
           {!loading && (
             <div style={{
@@ -730,11 +945,65 @@ export default function StandardTimeReportByProduct() {
                 borderRadius: 6,
                 fontWeight: 600,
                 fontSize: 16,
-                cursor: page === 1 ? 'not-allowed' : 'pointer',
+                cursor: page ===  1 ? 'not-allowed' : 'pointer',
                 boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
               }}
             >Prev</button>
             <span style={{marginRight: 12}}>Page {Number(page) || 1} / {Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1}</span>
+            {/* --- Jump to Page Input --- */}
+            <input
+              type="number"
+              min={1}
+              max={Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1}
+              value={jumpPageInput || ''}
+              onChange={e => {
+                const val = e.target.value;
+                if (/^\d*$/.test(val)) setJumpPageInput(val);
+              }}
+              onKeyDown={e => {
+                if (e.key === 'Enter') {
+                  const maxPage = Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1;
+                  let targetPage = Number(jumpPageInput);
+                  if (targetPage >= 1 && targetPage <= maxPage) {
+                    handleSearch(targetPage, pageSize);
+                  }
+                }
+              }}
+              placeholder="Page#"
+              style={{
+                width: 70,
+                marginRight: 6,
+                padding: '6px 8px',
+                fontSize: 16,
+                border: '2px solid #1976d2',
+                borderRadius: 6,
+                background: '#f5faff',
+                color: '#1976d2',
+                outline: 'none',
+                boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+              }}
+            />
+            <button
+              onClick={() => {
+                const maxPage = Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1;
+                let targetPage = Number(jumpPageInput);
+                if (targetPage >= 1 && targetPage <= maxPage) {
+                  handleSearch(targetPage, pageSize);
+                }
+              }}
+              style={{
+                marginRight: 12,
+                padding: '6px 14px',
+                background: '#1976d2',
+                color: '#fff',
+                border: 'none',
+                borderRadius: 6,
+                fontWeight: 600,
+                fontSize: 16,
+                cursor: 'pointer',
+                boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+              }}
+            >Go</button>
             <button 
               onClick={() => (page * pageSize < total) && handleSearch(Number(page) + 1, pageSize)} 
               disabled={page * pageSize >= total} 
