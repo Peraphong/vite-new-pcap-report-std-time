@@ -63,6 +63,31 @@ if (typeof document !== 'undefined') {
   document.head.appendChild(styleSheet);
 }
 
+// Add custom styles for SweetAlert2 popup (glassmorphism)
+const swalGlassStyles = `
+  .swal2-popup {
+    background: linear-gradient(120deg,rgba(255,255,255,0.92) 60%,rgba(210,230,255,0.92) 100%) !important;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18), 0 2px 12px 0 rgba(0,0,0,0.07) !important;
+    border-radius: 32px !important;
+    border: 2.5px solid rgba(30, 136, 229, 0.13) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    padding-top: 18px !important;
+    padding-bottom: 18px !important;
+    transition: box-shadow 0.3s, border 0.3s;
+  }
+  .swal2-title {
+    margin-bottom: 0.5em !important;
+  }
+`;
+if (typeof document !== 'undefined' && !document.getElementById('swal-glass-style')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.type = 'text/css';
+  styleSheet.id = 'swal-glass-style';
+  styleSheet.innerText = swalGlassStyles;
+  document.head.appendChild(styleSheet);
+}
+
 // ======================= Styled Components =======================
 const CircleButton = styled(IconButton)(({ btntype }) => ({
   borderRadius: "50%",
@@ -286,6 +311,9 @@ export default function StandardTimeReportByProduct() {
 
   // --- Export CSV ถ้าเกิน 120,000 rows พร้อม progress bar ---
   const handleExportCSV = async () => {
+    const PAGE_SIZE = 20000; // โหลดทีละ 20000 rows
+    const BATCH_SIZE = 3; // โหลดพร้อมกัน 3 หน้า
+    const ANIMATE_DURATION = 20000; // ms, ระยะเวลาให้เลขวิ่งถึงเป้าหมายแต่ละ batch
     const params = {
       factory: filters.factory === 'ALL' ? '' : filters.factory,
       unit: filters.unit === 'ALL' ? '' : filters.unit,
@@ -295,50 +323,144 @@ export default function StandardTimeReportByProduct() {
       product_to: filters.productTo === 'ALL' ? '' : filters.productTo,
       std_type: filters.stdType === 'ALL' ? '' : filters.stdType,
       page: 1,
-      pageSize: 10000
+      pageSize: PAGE_SIZE
     };
     let allRows = [];
     let totalRows = 0;
     let maxPage = 1;
+    let cancelled = false;
+    let abortController = new AbortController();
+    // สำหรับ animation แบบสมูท
+    let animFrame = null;
+    let animRow = 0;
+    let animPercent = 0;
+    let animTargetRow = 0;
+    let animTargetPercent = 0;
+    let animStartRow = 0;
+    let animStartPercent = 0;
+    let animStartTime = 0;
+    let animDuration = ANIMATE_DURATION;
+    function animateTo(targetRow, targetPercent, duration = ANIMATE_DURATION) {
+      animStartRow = animRow;
+      animStartPercent = animPercent;
+      animTargetRow = targetRow;
+      animTargetPercent = targetPercent;
+      animStartTime = performance.now();
+      animDuration = duration;
+      if (animFrame) cancelAnimationFrame(animFrame);
+      function step(now) {
+        if (cancelled) return;
+        const elapsed = Math.min(1, (now - animStartTime) / animDuration);
+        // ease out cubic
+        const t = 1 - Math.pow(1 - elapsed, 3);
+        animRow = Math.round(animStartRow + (animTargetRow - animStartRow) * t);
+        animPercent = animStartPercent + (animTargetPercent - animStartPercent) * t;
+        document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+        document.getElementById('swal-csv-progress-inner').style.width = Math.round(animPercent) + '%';
+        document.getElementById('swal-csv-progress-text').innerText = `Progress: ${Math.round(animPercent)}%`;
+        if (elapsed < 1 && (animRow !== animTargetRow || Math.abs(animPercent - animTargetPercent) > 0.5)) {
+          animFrame = requestAnimationFrame(step);
+        } else {
+          animRow = animTargetRow;
+          animPercent = animTargetPercent;
+          document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+          document.getElementById('swal-csv-progress-inner').style.width = Math.round(animPercent) + '%';
+          document.getElementById('swal-csv-progress-text').innerText = `Progress: ${Math.round(animPercent)}%`;
+        }
+      }
+      animFrame = requestAnimationFrame(step);
+    }
     try {
-      // เตรียม progress bar (ดีไซน์ใหม่ ตรงกลาง)
       Swal.fire({
-        title: '<span style="font-size:2rem;font-weight:700;color:#1976d2;letter-spacing:1px;">Exporting CSV...</span>',
-        html:
-          `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:8px 0 0 0;">` +
-            `<div id="swal-csv-progress-bar" style="width:320px;max-width:90vw;background:#e3e7f7;border-radius:16px;height:22px;overflow:hidden;box-shadow:0 2px 8px #b3b3e6 inset;">`+
-              `<div id="swal-csv-progress-inner" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 0%,#42a5f5 100%);transition:width 0.4s;border-radius:16px;"></div>`+
-            `</div>`+
-            `<div id="swal-csv-progress-text" style="font-size:1.15rem;color:#1976d2;font-weight:600;text-shadow:0 1px 0 #fff;margin-top:12px;text-align:center;width:100%;">Loading data...</div>`+
-            `<div id="swal-csv-rowcount-text" style="font-size:1.05rem;color:#1976d2;font-weight:500;margin-top:2px;text-align:center;width:100%;"></div>`+
-          `</div>`,
+        title: `<div style="font-size:2.4rem;font-weight:900;color:#1976d2;letter-spacing:1.5px;text-shadow:0 2px 8px #b3b3e6;">EXPORTING CSV</div>`,
+        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:38px 0 0 0;">
+          <div style="margin-bottom:32px;">
+            <svg width="80" height="80" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;filter:drop-shadow(0 2px 12px #b3c6f7);">
+              <circle cx="24" cy="24" r="20" fill="none" stroke="#e3e7f7" stroke-width="8"/>
+              <circle cx="24" cy="24" r="20" fill="none" stroke="#1976d2" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 100" stroke-dashoffset="60">
+                <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="1s" repeatCount="indefinite"/>
+              </circle>
+            </svg>
+          </div>
+          <div id="swal-csv-progress-bar" style="width:400px;max-width:97vw;background:rgba(255,255,255,0.45);backdrop-filter:blur(4px);border-radius:22px;height:34px;overflow:hidden;box-shadow:0 4px 24px #b3b3e6 inset,0 1.5px 8px #b3c6f7;margin-bottom:22px;border:2px solid #b3c6f7;">
+            <div id="swal-csv-progress-inner" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 0%,#42a5f5 100%);transition:width 0.4s;border-radius:22px;"></div>
+          </div>
+          <div id="swal-csv-progress-text" style="font-size:1.7rem;color:#1976d2;font-weight:900;text-shadow:0 1px 0 #fff,0 2px 8px #b3c6f7;margin-top:2px;text-align:center;width:100%;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+          <div id="swal-csv-rowcount-text" style="font-size:1.28rem;color:#1976d2;font-weight:700;margin-top:2px;text-align:center;width:100%;letter-spacing:0.5px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+          <div id="swal-csv-eta-text" style="font-size:1.18rem;color:#388e3c;font-weight:800;margin-top:12px;text-align:center;width:100%;letter-spacing:0.5px;text-shadow:0 1px 0 #fff;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+          <button id="swal-csv-cancel-btn" style="margin-top:32px;padding:12px 48px;font-size:1.25rem;font-weight:800;color:#fff;background:linear-gradient(90deg,#ef5350 0%,#e57373 100%);border:none;border-radius:12px;box-shadow:0 4px 16px #e57373,0 1.5px 8px #fff;cursor:pointer;transition:background 0.2s,transform 0.1s;outline:none;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">Cancel</button>
+        </div>`,
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
-        didOpen: () => { Swal.showLoading(); }
+        didOpen: () => {
+          document.getElementById('swal-csv-cancel-btn').onclick = () => {
+            cancelled = true;
+            abortController.abort();
+            if (animFrame) cancelAnimationFrame(animFrame);
+            Swal.close();
+            Swal.fire({ icon: 'info', title: 'Export Cancelled', text: 'The export has been cancelled.', confirmButtonText: 'OK' });
+          };
+        }
       });
-      // Load first page
-      const res = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params });
+      // Load first page (เพื่อดูจำนวนทั้งหมด)
+      const t0 = Date.now();
+      const res = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params, signal: abortController.signal });
+      if (cancelled) return;
       const rows = Array.isArray(res.data.rows) ? res.data.rows : [];
       totalRows = res.data.total || rows.length;
       allRows = rows;
-      maxPage = Math.ceil(totalRows / params.pageSize);
-      // อัปเดต progress
-      let percent = Math.min(100, Math.round((1 / maxPage) * 100));
-      document.getElementById('swal-csv-progress-inner').style.width = percent + '%';
-      document.getElementById('swal-csv-progress-text').innerText = `Page 1 / ${maxPage} (${percent}%)`;
-      document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${allRows.length.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
-      for (let p = 2; p <= maxPage; p++) {
-        const resPage = await axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params: { ...params, page: p } });
-        const rowsPage = Array.isArray(resPage.data.rows) ? resPage.data.rows : [];
-        allRows = allRows.concat(rowsPage);
-        if (rowsPage.length === 0) break;
-        percent = Math.min(100, Math.round((p / maxPage) * 100));
-        document.getElementById('swal-csv-progress-inner').style.width = percent + '%';
-        document.getElementById('swal-csv-progress-text').innerText = `Page ${p} / ${maxPage} (${percent}%)`;
-        document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${allRows.length.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+      maxPage = Math.ceil(totalRows / PAGE_SIZE);
+      let loadedRows = rows.length;
+      let finishedPages = 1;
+      let percent = Math.min(100, Math.round((loadedRows / totalRows) * 100));
+      animRow = 0; animPercent = 0;
+      animateTo(loadedRows, percent, ANIMATE_DURATION);
+      document.getElementById('swal-csv-eta-text').innerText = '';
+      // Prepare page list
+      let pageList = [];
+      for (let p = 2; p <= maxPage; p++) pageList.push(p);
+      // Track time for ETA
+      let pageTimes = [Date.now() - t0];
+      // Batch loop (ทีละ 3 หน้า)
+      for (let i = 0; i < pageList.length; i += BATCH_SIZE) {
+        if (cancelled) { if (animFrame) cancelAnimationFrame(animFrame); return; }
+        const batchPages = pageList.slice(i, i + BATCH_SIZE);
+        const batchStart = Date.now();
+        const batchRequests = batchPages.map(p =>
+          axios.get("http://10.17.100.115:3001/api/smart_pcap/filter-std-time-by-product-report-new", { params: { ...params, page: p }, signal: abortController.signal })
+            .then(resPage => ({ rows: Array.isArray(resPage.data.rows) ? resPage.data.rows : [], page: p, time: Date.now() }))
+            .catch(() => ({ rows: [], page: p, time: Date.now() }))
+        );
+        const batchResults = await Promise.all(batchRequests);
+        if (cancelled) { if (animFrame) cancelAnimationFrame(animFrame); return; }
+        // Sort by page for correct order
+        batchResults.sort((a, b) => a.page - b.page);
+        batchResults.forEach(result => {
+          allRows = allRows.concat(result.rows);
+          loadedRows += result.rows.length;
+          finishedPages++;
+          percent = Math.min(100, Math.round((loadedRows / totalRows) * 100));
+          animateTo(loadedRows, percent, ANIMATE_DURATION);
+        });
+        // ETA
+        pageTimes.push(Date.now() - batchStart);
+        const avgTime = pageTimes.reduce((a, b) => a + b, 0) / pageTimes.length;
+        const remainPages = maxPage - finishedPages;
+        const etaSec = Math.round((avgTime * remainPages) / 1000);
+        const min = Math.floor(etaSec / 60);
+        const sec = etaSec % 60;
+        let etaText = '';
+        if (remainPages > 0) {
+          etaText = `TIME : ${min}m ${sec}s`;
+        } else {
+          etaText = 'Almost done...';
+        }
+        document.getElementById('swal-csv-eta-text').innerText = etaText;
       }
-      Swal.close();
+      if (animFrame) cancelAnimationFrame(animFrame);
+      animateTo(totalRows, 100, 600);
+      setTimeout(() => Swal.close(), 400);
       if (allRows.length === 0) {
         Swal.fire({ icon: 'info', title: 'No data to export', confirmButtonText: 'OK' });
         return;
@@ -348,11 +470,21 @@ export default function StandardTimeReportByProduct() {
       Swal.fire({
         icon: 'success',
         title: 'Export successful!',
-        text: `Exported ${allRows.length.toLocaleString()} rows (CSV)`,
+        text: `Exported ${allRows.length.toLocaleString()} rows (CSV)` + (totalRows ? ` / Total: ${totalRows.toLocaleString()} rows` : ''),
         confirmButtonText: 'OK'
       });
+      // Show Thai complete message after export
+      setTimeout(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'Export completed',
+          confirmButtonText: 'OK'
+        });
+      }, 500);
       return;
     } catch (err) {
+      if (animFrame) cancelAnimationFrame(animFrame);
+      if (cancelled) return;
       Swal.close();
       Swal.fire({ icon: 'error', title: 'Export failed', text: 'An error occurred while exporting CSV', confirmButtonText: 'OK' });
     }
@@ -841,7 +973,7 @@ export default function StandardTimeReportByProduct() {
             textAlign: 'left',
             paddingLeft: 12
           }}>
-            Product From: {filters.productFrom !== 'ALL' ? filters.productFrom : '-'} &nbsp; to &nbsp; Product To: {filters.productTo !== 'ALL' ? filters.productTo : '-'}
+            PRODUCT FROM: {filters.productFrom !== 'ALL' ? filters.productFrom : '-'} &nbsp; TO &nbsp; PRODUCT TO: {filters.productTo !== 'ALL' ? filters.productTo : '-'}
           </div>
           {loading && (
             <div style={{textAlign:'center',margin:'20px',fontSize:'20px',color:'#1976d2'}}>Loading data...</div>
