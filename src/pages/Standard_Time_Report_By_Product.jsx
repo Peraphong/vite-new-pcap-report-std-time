@@ -355,41 +355,53 @@ export default function StandardTimeReportByProduct() {
         const t = 1 - Math.pow(1 - elapsed, 3);
         animRow = Math.round(animStartRow + (animTargetRow - animStartRow) * t);
         animPercent = animStartPercent + (animTargetPercent - animStartPercent) * t;
-        document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
-        document.getElementById('swal-csv-progress-inner').style.width = Math.round(animPercent) + '%';
-        document.getElementById('swal-csv-progress-text').innerText = `Progress: ${Math.round(animPercent)}%`;
+        
+        // ตรวจสอบ element ก่อนการใช้งาน
+        const rowCountEl = document.getElementById('swal-csv-rowcount-text');
+        const progressInnerEl = document.getElementById('swal-csv-progress-inner');
+        const progressTextEl = document.getElementById('swal-csv-progress-text');
+        
+        if (rowCountEl) rowCountEl.innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+        if (progressInnerEl) progressInnerEl.style.width = Math.round(animPercent) + '%';
+        if (progressTextEl) progressTextEl.innerText = `Progress: ${Math.round(animPercent)}%`;
+        
         if (elapsed < 1 && (animRow !== animTargetRow || Math.abs(animPercent - animTargetPercent) > 0.5)) {
           animFrame = requestAnimationFrame(step);
         } else {
           animRow = animTargetRow;
           animPercent = animTargetPercent;
-          document.getElementById('swal-csv-rowcount-text').innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
-          document.getElementById('swal-csv-progress-inner').style.width = Math.round(animPercent) + '%';
-          document.getElementById('swal-csv-progress-text').innerText = `Progress: ${Math.round(animPercent)}%`;
+          if (rowCountEl) rowCountEl.innerText = `Loaded ${animRow.toLocaleString()} / ${totalRows.toLocaleString()} rows`;
+          if (progressInnerEl) progressInnerEl.style.width = Math.round(animPercent) + '%';
+          if (progressTextEl) progressTextEl.innerText = `Progress: ${Math.round(animPercent)}%`;
         }
       }
       animFrame = requestAnimationFrame(step);
     }
     try {
       Swal.fire({
-        title: `<div style="font-size:2.4rem;font-weight:900;color:#1976d2;letter-spacing:1.5px;text-shadow:0 2px 8px #b3b3e6;">EXPORTING CSV</div>`,
-        html: `<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;padding:38px 0 0 0;">
-          <div style="margin-bottom:32px;">
-            <svg width="80" height="80" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:auto;filter:drop-shadow(0 2px 12px #b3c6f7);">
-              <circle cx="24" cy="24" r="20" fill="none" stroke="#e3e7f7" stroke-width="8"/>
-              <circle cx="24" cy="24" r="20" fill="none" stroke="#1976d2" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 100" stroke-dashoffset="60">
-                <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="1s" repeatCount="indefinite"/>
-              </circle>
-            </svg>
+        title: '',
+        html: `
+          <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;height:100%;padding:0 8px 8px 8px;">
+            <div style="font-size:2.6rem;font-weight:900;color:#1565c0;letter-spacing:1.5px;text-shadow:0 2px 12px #b3b3e6,0 1px 0 #fff;margin-bottom:10px;text-align:center;width:100%;">EXPORTING CSV</div>
+            <div style="display:flex;justify-content:center;align-items:center;width:100%;margin-bottom:18px;">
+              <svg width="90" height="90" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" style="display:block;filter:drop-shadow(0 2px 16px #b3c6f7);">
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#e3e7f7" stroke-width="8"/>
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#1976d2" stroke-width="8" stroke-linecap="round" stroke-dasharray="100 100" stroke-dashoffset="60">
+                  <animateTransform attributeName="transform" type="rotate" from="0 24 24" to="360 24 24" dur="1s" repeatCount="indefinite"/>
+                </circle>
+              </svg>
+            </div>
+            <div id="swal-csv-progress-bar" style="width:92%;max-width:360px;background:rgba(30,136,229,0.10);backdrop-filter:blur(4px);border-radius:22px;height:36px;overflow:hidden;box-shadow:0 4px 24px #b3b3e6 inset,0 1.5px 8px #b3c6f7;margin-bottom:14px;border:2px solid #b3c6f7;position:relative;">
+              <div id="swal-csv-progress-inner" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 0%,#42a5f5 100%);transition:width 0.4s;border-radius:22px;position:absolute;left:0;top:0;"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;width:100%;gap:2px;">
+              <div id="swal-csv-progress-text" style="font-size:2rem;color:#1976d2;font-weight:900;text-shadow:0 1px 0 #fff,0 2px 8px #b3c6f7;text-align:center;width:100%;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+              <div id="swal-csv-rowcount-text" style="font-size:1.35rem;color:#1976d2;font-weight:700;text-align:center;width:100%;letter-spacing:0.5px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+              <div id="swal-csv-eta-text" style="font-size:1.22rem;color:#388e3c;font-weight:800;margin-top:6px;text-align:center;width:100%;letter-spacing:0.5px;text-shadow:0 1px 0 #fff;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
+            </div>
+            <button id="swal-csv-cancel-btn" style="margin-top:32px;padding:14px 56px;font-size:1.35rem;font-weight:900;color:#fff;background:linear-gradient(90deg,#ef5350 0%,#e57373 100%);border:none;border-radius:16px;box-shadow:0 4px 16px #e57373,0 1.5px 8px #fff;cursor:pointer;transition:background 0.2s,transform 0.1s;outline:none;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">Cancel</button>
           </div>
-          <div id="swal-csv-progress-bar" style="width:400px;max-width:97vw;background:rgba(255,255,255,0.45);backdrop-filter:blur(4px);border-radius:22px;height:34px;overflow:hidden;box-shadow:0 4px 24px #b3b3e6 inset,0 1.5px 8px #b3c6f7;margin-bottom:22px;border:2px solid #b3c6f7;">
-            <div id="swal-csv-progress-inner" style="height:100%;width:0%;background:linear-gradient(90deg,#1976d2 0%,#42a5f5 100%);transition:width 0.4s;border-radius:22px;"></div>
-          </div>
-          <div id="swal-csv-progress-text" style="font-size:1.7rem;color:#1976d2;font-weight:900;text-shadow:0 1px 0 #fff,0 2px 8px #b3c6f7;margin-top:2px;text-align:center;width:100%;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
-          <div id="swal-csv-rowcount-text" style="font-size:1.28rem;color:#1976d2;font-weight:700;margin-top:2px;text-align:center;width:100%;letter-spacing:0.5px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
-          <div id="swal-csv-eta-text" style="font-size:1.18rem;color:#388e3c;font-weight:800;margin-top:12px;text-align:center;width:100%;letter-spacing:0.5px;text-shadow:0 1px 0 #fff;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">&nbsp;</div>
-          <button id="swal-csv-cancel-btn" style="margin-top:32px;padding:12px 48px;font-size:1.25rem;font-weight:800;color:#fff;background:linear-gradient(90deg,#ef5350 0%,#e57373 100%);border:none;border-radius:12px;box-shadow:0 4px 16px #e57373,0 1.5px 8px #fff;cursor:pointer;transition:background 0.2s,transform 0.1s;outline:none;letter-spacing:1.2px;font-family:'Segoe UI',Roboto,'Sarabun',sans-serif;">Cancel</button>
-        </div>`,
+        `,
         allowOutsideClick: false,
         allowEscapeKey: false,
         showConfirmButton: false,
@@ -416,7 +428,8 @@ export default function StandardTimeReportByProduct() {
       let percent = Math.min(100, Math.round((loadedRows / totalRows) * 100));
       animRow = 0; animPercent = 0;
       animateTo(loadedRows, percent, ANIMATE_DURATION);
-      document.getElementById('swal-csv-eta-text').innerText = '';
+      const etaEl = document.getElementById('swal-csv-eta-text');
+      if (etaEl) etaEl.innerText = '';
       // Prepare page list
       let pageList = [];
       for (let p = 2; p <= maxPage; p++) pageList.push(p);
@@ -441,8 +454,9 @@ export default function StandardTimeReportByProduct() {
           loadedRows += result.rows.length;
           finishedPages++;
           percent = Math.min(100, Math.round((loadedRows / totalRows) * 100));
-          animateTo(loadedRows, percent, ANIMATE_DURATION);
         });
+        const batchTime = Date.now() - batchStart;
+        animateTo(loadedRows, percent, batchTime);
         // ETA
         pageTimes.push(Date.now() - batchStart);
         const avgTime = pageTimes.reduce((a, b) => a + b, 0) / pageTimes.length;
@@ -456,7 +470,8 @@ export default function StandardTimeReportByProduct() {
         } else {
           etaText = 'Almost done...';
         }
-        document.getElementById('swal-csv-eta-text').innerText = etaText;
+        const etaTextEl = document.getElementById('swal-csv-eta-text');
+        if (etaTextEl) etaTextEl.innerText = etaText;
       }
       if (animFrame) cancelAnimationFrame(animFrame);
       animateTo(totalRows, 100, 600);
@@ -503,7 +518,12 @@ export default function StandardTimeReportByProduct() {
     for (const row of rows) {
       const line = keys.map(key => {
         let value = row[key];
-        if (typeof value === 'undefined' || value === null) value = '';
+        if (
+          typeof value === 'undefined' ||
+          value === null ||
+          Number.isNaN(value) ||
+          (typeof value === 'string' && value.trim().toLowerCase() === 'nan')
+        ) value = '-';
         if (typeof value === 'string') value = '"' + value.replace(/"/g, '""').replace(/\r?\n|\r/g, ' ') + '"';
         return value;
       }).join(',');
@@ -934,7 +954,7 @@ export default function StandardTimeReportByProduct() {
                     display: "grid",
                     gridTemplateColumns: "repeat(2, 1fr)",
                     gridTemplateRows: "repeat(2, 1fr)",
-                    gap: 18,
+                    gap: 5,
                     background: "rgba(232,245,233,0.0)",
                     borderRadius: 18,
                     padding: 1,

@@ -418,7 +418,7 @@ export default function StandardTimeSimilarStructure() {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="ค้นหา Product Name"
+                  label="Search Product Name"
                   variant="outlined"
                   size="small"
                   style={{ width: 250 }}
@@ -454,7 +454,7 @@ export default function StandardTimeSimilarStructure() {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="ค้นหา Process"
+                  label="Search Process"
                   variant="outlined"
                   size="small"
                   style={{ width: 250, marginLeft: -80, marginRight: "auto" }}

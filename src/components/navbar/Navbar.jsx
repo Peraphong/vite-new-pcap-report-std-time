@@ -146,6 +146,11 @@ export default function Navbar({ onToggle }) {
         setMenuIcon(<img src="/map.png" alt="" width={30} />);
         setSelectedMenu("stdtimeReport");
         break;
+      case "/standard_time_various_types_of_graphs":
+        setMenuName("Standard Time Various Types of Graphs");
+        setMenuIcon(<img src="/analysis.png" alt="" width={30} />);
+        setSelectedMenu("stdtimeGraphs");
+        break;
       case "/smartsus_sus_delivery_order":
         setMenuName("SUS Delivery Order Management");
         setMenuIcon(<img src="/sus-delivery.png" alt="" width={30} />);
@@ -161,11 +166,6 @@ export default function Navbar({ onToggle }) {
         setMenuIcon(<img src="/stock-fin.png" alt="" width={30} />);
         setSelectedMenu("fin");
         break;
-
-      // case "/smartsus_summary_sus_purchaser":
-      //   setMenuName("Summary SUS Plate by Item Material (Purchaser)");
-      //   setMenuIcon(<img src="/purchase-order.png" alt="" width={30} />);
-      //   break;
       case "/smartsus_summary_sus_purchaser_new":
         setMenuName("Summary SUS Plate by Item Material (Purchaser)");
         setMenuIcon(<img src="/purchase-order.png" alt="" width={30} />);
@@ -192,8 +192,8 @@ export default function Navbar({ onToggle }) {
         setSelectedMenu("mFin");
         break;
       default:
-        setMenuName("SUS Plate Management");
-        setMenuIcon(<img src="/sus-plate.png" alt="" width={30} />);
+        setMenuName("NEW PCAP SYSTEM REPORT");
+        setMenuIcon(<img src="/analysis.png" alt="" width={30} />);
     }
   }, [location.pathname]);
 
@@ -328,7 +328,7 @@ export default function Navbar({ onToggle }) {
               </ListItem>
             </List>
           </div> */}
-{/* //*Similar ****************************************************** */}
+          {/* //*Similar ****************************************************** */}
           <div
             className={`${
               getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
@@ -375,7 +375,8 @@ export default function Navbar({ onToggle }) {
               </ListItemButton>
             </ListItem>
           </List>
-{/* //*Report By Product ****************************************************** */}
+
+          {/* //*Report By Product ****************************************************** */}
           <div
             className={`${
               getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
@@ -421,6 +422,53 @@ export default function Navbar({ onToggle }) {
                 </ListItemIcon>
                 <ListItemText
                   primary="Standard Time Table"
+                  sx={{ opacity: open ? 1 : 0 }}
+                />
+              </ListItemButton>
+            </ListItem>
+          </List>
+
+          {/* Various Types of Graphs */}
+          <List open={open}>
+            <ListItem
+              onClick={() => {
+                setMenuName("Standard Time Various Types of Graphs");
+                setSelectedMenu("stdtimeGraphs");
+              }}
+              disablePadding
+              sx={{ display: "block", color: "black" }}
+              component={Link}
+              to="/standard_time_various_types_of_graphs"
+            >
+              <ListItemButton
+                sx={{
+                  minHeight: 48,
+                  justifyContent: open ? "initial" : "center",
+                  px: 2.5,
+                  border:
+                    selectedMenu === "stdtimeGraphs"
+                      ? "2px solid #1976d2"
+                      : "none",
+                  backgroundColor:
+                    selectedMenu === "stdtimeGraphs"
+                      ? "#E3F2FD"
+                      : "transparent",
+                  borderRadius: "8px",
+                  marginBottom: -1,
+                  display: "flex",
+                }}
+              >
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 2 : "auto",
+                    justifyContent: "center",
+                  }}
+                >
+                  <img src="/analysis.png" alt="" width={30} />
+                </ListItemIcon>
+                <ListItemText
+                  primary="Standard Time Various Graphs"
                   sx={{ opacity: open ? 1 : 0 }}
                 />
               </ListItemButton>

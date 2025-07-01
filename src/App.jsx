@@ -9,6 +9,7 @@ import Navbar from "./components/navbar/Navbar";
 
 import StandardTimeSimilarStructure from './pages/Standard_time_Similar_structure';
 import StandardTimeReportByProduct from "./pages/Standard_Time_Report_By_Product";
+import StandardTimeVariousTypesOfGraphs from "./pages/Standard_time_Various_types_of_graphs";
 
 export default function App() {
   
@@ -23,6 +24,7 @@ export default function App() {
               {/* <Route path="/smartsus_sus_delivery_order" element={<SmartSus_sus_delivery_order />}/> */}
               {/* <Route path="/smartsus_sus_delivery_order_new" element={<SmartSus_sus_delivery_order_new />}/> */}
               <Route path="/standard_time_similar_structure" element={<StandardTimeSimilarStructure />} />
+              <Route path="/standard_time_various_types_of_graphs" element={<StandardTimeVariousTypesOfGraphs />} />
          
               <Route path="/Standard_Time_Report_By_Product" element={<StandardTimeReportByProduct />} />
             </Route>
