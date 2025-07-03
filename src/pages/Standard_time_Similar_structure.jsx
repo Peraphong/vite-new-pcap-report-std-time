@@ -369,21 +369,23 @@ export default function StandardTimeSimilarStructure() {
             minHeight: "650px",
             borderRadius: 12,
             boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-            maxWidth: "100%",
+            maxWidth: "1800px",
+            width: "98vw",
+            margin: "0 auto",
             overflow: "hidden",
           }}
         >
           {/* Search Section */}
           <div
             style={{
-              display: "grid",
-              gridTemplateColumns: "350px 350px 1fr",
-              gap: "16px",
-              marginBottom: 24,
+              display: "flex",
+              flexDirection: "row",
               alignItems: "center",
-              width: "840px",
-              minWidth: "840px",
-              maxWidth: "840px",
+              gap: 16,
+              marginBottom: 24,
+              width: "100%",
+              maxWidth: 1200,
+              margin: "0 auto",
             }}
           >
             {/* Product Autocomplete */}
@@ -581,12 +583,12 @@ export default function StandardTimeSimilarStructure() {
           <div
             style={{
               width: "1200px",
-              minWidth: "1200px",
+              minWidth: "1500px",
               maxWidth: "1200px",
               overflowX: "auto",
               maxHeight: 500,
               overflowY: "auto",
-              margin: "0 auto",
+              margin: "32px auto 0 auto", 
             }}
           >
             <table className="custom-table">

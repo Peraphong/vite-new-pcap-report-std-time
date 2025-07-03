@@ -328,6 +328,8 @@ export default function Navbar({ onToggle }) {
               </ListItem>
             </List>
           </div> */}
+
+          
           {/* //*Similar ****************************************************** */}
           <div
             className={`${

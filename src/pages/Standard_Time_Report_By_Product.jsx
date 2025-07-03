@@ -20,6 +20,9 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "./styles/Standard_Time_Report_By_Product.sticky.css";
 
+
+
+
 // ======================= Global Styles for Fixing Button Visibility =======================
 // Add CSS to fix hidden button issues
 const globalStyles = `
@@ -1002,18 +1005,18 @@ export default function StandardTimeReportByProduct() {
             <div style={{
               position: 'relative',
               marginLeft: '80px',
-              width: '93.8%', // ปรับจาก calc(100vw - 88px) เป็น 100%
-              maxWidth: '100vw', // ป้องกันล้นขอบ
+              width: '93.8%', 
+              maxWidth: '100vw', 
               minHeight: '350px',
-              height: 'calc(100vh - 270px)', // ให้กล่องตารางสูงเกือบสุดหน้าจอ (ปรับค่าตามต้องการ)
+              height: 'calc(100vh - 270px)', 
               background: '#fff',
               border: '2px solid #a48cf0',
               borderRadius: '10px',
               boxShadow: '0 2px 12px 0 rgba(164,140,240,0.08)',
-              overflowX: 'auto', // ให้ scroll แนวนอน
+              overflowX: 'auto', 
               overflowY: 'auto',
               padding: 0,
-              marginTop: '0px', // ขยับลงให้พ้น navbar
+              marginTop: '0px', 
               zIndex: 10,
             }}>
               <table className="w-full border-collapse min-w-max">
