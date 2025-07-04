@@ -15,6 +15,16 @@ import ExcelJS from "exceljs";
 import Swal from 'sweetalert2';
 
 export default function StandardTimeSimilarStructure() {
+  // Modern gradient background for the whole page
+  const pageBg = {
+    minHeight: '100vh',
+    width: '100vw',
+    background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: -1,
+  };
   // -------------------- State --------------------
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
@@ -356,119 +366,178 @@ export default function StandardTimeSimilarStructure() {
   // -------------------- Render --------------------
   return (
     <>
+      <div style={pageBg}></div>
       <Navbar onToggle={handleNavbarToggle} />
-      <Box marginLeft={isNavbarOpen ? "220px" : 4} marginTop={10}>
+      <Box marginLeft={isNavbarOpen ? "220px" : 4} marginTop={8}>
         <div
           style={{
             display: "flex",
             flexDirection: "column",
-            alignItems: "flex-start",
-            padding: 24,
-            gap: "4px",
-            background: "#fff",
-            minHeight: "650px",
-            borderRadius: 12,
-            boxShadow: "0 2px 12px rgba(0,0,0,0.07)",
-            maxWidth: "1800px",
-            width: "98vw",
+            alignItems: "center",
+            padding: 40,
+            gap: "24px",
+            background: "rgba(255,255,255,0.92)",
+            minHeight: "700px",
+            borderRadius: 28,
+            boxShadow: "0 8px 32px 0 rgba(0,87,183,0.13)",
+            maxWidth: "1700px",
+            width: "96vw",
             margin: "0 auto",
             overflow: "hidden",
+            position: 'relative',
           }}
         >
+          {/* Decorative floating shapes */}
+          <div style={{
+            position: 'absolute',
+            top: -60,
+            right: 40,
+            width: 120,
+            height: 120,
+            background: 'radial-gradient(circle at 40% 60%,rgb(8, 170, 229) 0%, #1976d2 100%)',
+            opacity: 0.18,
+            borderRadius: '50%',
+            zIndex: 0,
+            filter: 'blur(2px)'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: -50,
+            left: 60,
+            width: 90,
+            height: 90,
+            background: 'radial-gradient(circle at 60% 40%, #ffb6b9 0%, #f7cac9 100%)',
+            opacity: 0.13,
+            borderRadius: '50%',
+            zIndex: 0,
+            filter: 'blur(2px)'
+          }} />
+          {/* Title Section */}
+          <div style={{
+            width: '100%',
+            textAlign: 'center',
+            marginBottom: 10,
+            zIndex: 1,
+          }}>
+            <h1 style={{
+              fontSize: 38,
+              fontWeight: 800,
+              letterSpacing: 1.2,
+              color: '#1976d2',
+              marginBottom: 4,
+              textShadow: '0 2px 12px #b3d8ff',
+              fontFamily: 'Segoe UI, Poppins, sans-serif',
+            }}>
+              Standard Time Similar Structure
+            </h1>
+            <div style={{
+              fontSize: 20,
+              color: '#4a6fa1',
+              fontWeight: 400,
+              marginBottom: 8,
+              fontFamily: 'Segoe UI, Poppins, sans-serif',
+            }}>
+              Effortlessly compare and analyze standard times by product and process
+            </div>
+          </div>
           {/* Search Section */}
           <div
             style={{
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              gap: 16,
-              marginBottom: 24,
+              gap: 28,
+              marginBottom: -30,
               width: "100%",
-              maxWidth: 1200,
+              maxWidth: 2200,
               margin: "0 auto",
+              background: "linear-gradient(90deg, #e3f0ff 60%, #f7fafd 100%)",
+              borderRadius: 18,
+              boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
+              padding: 28,
+              zIndex: 1,
             }}
           >
             {/* Product Autocomplete */}
-            <Autocomplete
-              open={productOpen}
-              onOpen={() => setProductOpen(true)}
-              onClose={() => setProductOpen(false)}
-              freeSolo
-              options={productOptions}
-              loading={productLoading}
-              value={selectedProduct}
-              inputValue={productInput}
-              onChange={(event, newValue) => {
-                setSelectedProduct(newValue);
-                setSelectedProcess(null);
-                setProcessInput("");
-              }}
-              getOptionLabel={(option) =>
-                typeof option === "string" ? option : option.prd_name || ""
-              }
-              isOptionEqualToValue={(option, value) =>
-                (option.prd_name || "") === (value.prd_name || "")
-              }
-              onInputChange={(event, newInputValue) =>
-                setProductInput(newInputValue)
-              }
-              renderOption={(props, option, { index }) => (
-                <li {...props} key={(option.prd_name || "") + index}>
-                  {option.prd_name || ""}
-                </li>
-              )}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search Product Name"
-                  variant="outlined"
-                  size="small"
-                  style={{ width: 250 }}
-                />
-              )}
-              style={{ width: "100%" }}
-            />
+            <div style={{ minWidth: 270, flex: 1 }}>
+              <Autocomplete
+                open={productOpen}
+                onOpen={() => setProductOpen(true)}
+                onClose={() => setProductOpen(false)}
+                freeSolo
+                options={productOptions}
+                loading={productLoading}
+                value={selectedProduct}
+                inputValue={productInput}
+                onChange={(event, newValue) => {
+                  setSelectedProduct(newValue);
+                  setSelectedProcess(null);
+                  setProcessInput("");
+                }}
+                getOptionLabel={(option) =>
+                  typeof option === "string" ? option : option.prd_name || ""
+                }
+                isOptionEqualToValue={(option, value) =>
+                  (option.prd_name || "") === (value.prd_name || "")
+                }
+                onInputChange={(event, newInputValue) =>
+                  setProductInput(newInputValue)
+                }
+                renderOption={(props, option, { index }) => (
+                  <li {...props} key={(option.prd_name || "") + index}>
+                    {option.prd_name || ""}
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Product Name"
+                    variant="outlined"
+                    size="medium"
+                    style={{ width: 270, background: '#fff', borderRadius: 8 }}
+                  />
+                )}
+                style={{ width: "100%" }}
+              />
+            </div>
             {/* Process Autocomplete */}
-            <Autocomplete
-              open={processOpen}
-              onOpen={() => setProcessOpen(true)}
-              onClose={() => setProcessOpen(false)}
-              freeSolo
-              options={processOptions}
-              loading={processLoading}
-              value={selectedProcess}
-              inputValue={processInput}
-              onChange={(event, newValue) => setSelectedProcess(newValue)}
-              getOptionLabel={(option) =>
-                typeof option === "string" ? option : option.proc_disp || ""
-              }
-              isOptionEqualToValue={(option, value) =>
-                (option.proc_disp || "") === (value.proc_disp || "")
-              }
-              onInputChange={(event, newInputValue) =>
-                setProcessInput(newInputValue)
-              }
-              renderOption={(props, option, { index }) => (
-                <li {...props} key={(option.proc_disp || "") + index}>
-                  {option.proc_disp || ""}
-                </li>
-              )}
-              renderInput={(params) => (
-                <TextField
-                  {...params}
-                  label="Search Process"
-                  variant="outlined"
-                  size="small"
-                  style={{ width: 250, marginLeft: -80, marginRight: "auto" }}
-                  InputLabelProps={{ style: { left: 0 } }}
-                  inputProps={{
-                    ...params.inputProps,
-                    style: { textAlign: "left" },
-                  }}
-                />
-              )}
-              style={{ width: "100%" }}
-            />
+            <div style={{ minWidth: 270, flex: 1 }}>
+              <Autocomplete
+                open={processOpen}
+                onOpen={() => setProcessOpen(true)}
+                onClose={() => setProcessOpen(false)}
+                freeSolo
+                options={processOptions}
+                loading={processLoading}
+                value={selectedProcess}
+                inputValue={processInput}
+                onChange={(event, newValue) => setSelectedProcess(newValue)}
+                getOptionLabel={(option) =>
+                  typeof option === "string" ? option : option.proc_disp || ""
+                }
+                isOptionEqualToValue={(option, value) =>
+                  (option.proc_disp || "") === (value.proc_disp || "")
+                }
+                onInputChange={(event, newInputValue) =>
+                  setProcessInput(newInputValue)
+                }
+                renderOption={(props, option, { index }) => (
+                  <li {...props} key={(option.proc_disp || "") + index}>
+                    {option.proc_disp || ""}
+                  </li>
+                )}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Process"
+                    variant="outlined"
+                    size="medium"
+                    style={{ width: 270, background: '#fff', borderRadius: 8 }}
+                  />
+                )}
+                style={{ width: "100%" }}
+              />
+            </div>
 
             {/* Action Buttons */}
             <div
@@ -476,9 +545,10 @@ export default function StandardTimeSimilarStructure() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: 20, // ระยะห่างแต่ละปุ่มเท่ากัน
+                gap: 24,
                 width: "100%",
-                marginLeft: -100,
+                marginLeft: 0,
+                zIndex: 1,
               }}
             >
               <Button
@@ -486,32 +556,36 @@ export default function StandardTimeSimilarStructure() {
                 variant="contained"
                 color="primary"
                 style={{
-                  width: 40,
-                  height: 40,
-                  minWidth: 40,
-                  minHeight: 40,
+                  width: 48,
+                  height: 48,
+                  minWidth: 48,
+                  minHeight: 48,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 0,
+                  boxShadow: '0 2px 8px #b3d8ff',
+                  fontSize: 18,
                 }}
                 onClick={handleSearch}
+                title="Search"
               >
-                <SearchIcon style={{ fontSize: 24 }} />
+                <SearchIcon style={{ fontSize: 28 }} />
               </Button>
               <Button
                 className="action-btn"
                 variant="outlined"
                 color="error"
                 style={{
-                  width: 40,
-                  height: 40,
-                  minWidth: 40,
-                  minHeight: 40,
+                  width: 48,
+                  height: 48,
+                  minWidth: 48,
+                  minHeight: 48,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 0,
+                  fontSize: 18,
                 }}
                 onClick={handleClearSearch}
                 title="Clear"
@@ -520,8 +594,8 @@ export default function StandardTimeSimilarStructure() {
                   src="/clear1.png"
                   alt="Clear"
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 26,
+                    height: 26,
                   }}
                 />
               </Button>
@@ -530,14 +604,15 @@ export default function StandardTimeSimilarStructure() {
                 variant="outlined"
                 color="info"
                 style={{
-                  width: 40,
-                  height: 40,
-                  minWidth: 40,
-                  minHeight: 40,
+                  width: 48,
+                  height: 48,
+                  minWidth: 48,
+                  minHeight: 48,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 0,
+                  fontSize: 18,
                 }}
                 onClick={handleRefreshTable}
                 title="Refresh"
@@ -546,8 +621,8 @@ export default function StandardTimeSimilarStructure() {
                   src="/ref.png"
                   alt="Refresh"
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 26,
+                    height: 26,
                   }}
                 />
               </Button>
@@ -556,23 +631,25 @@ export default function StandardTimeSimilarStructure() {
                 variant="outlined"
                 color="success"
                 style={{
-                  width: 40,
-                  height: 40,
-                  minWidth: 40,
-                  minHeight: 40,
+                  width: 48,
+                  height: 48,
+                  minWidth: 48,
+                  minHeight: 48,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
                   padding: 0,
+                  fontSize: 18,
                 }}
                 onClick={handleExportExcel}
+                title="Export to Excel"
               >
                 <img
                   src="/excel.png"
                   alt="Excel"
                   style={{
-                    width: 22,
-                    height: 22,
+                    width: 26,
+                    height: 26,
                   }}
                 />
               </Button>
@@ -582,16 +659,20 @@ export default function StandardTimeSimilarStructure() {
           {/* Table Section */}
           <div
             style={{
-              width: "1200px",
-              minWidth: "1500px",
-              maxWidth: "1200px",
+              width: "100%",
+              minWidth: "1200px",
+              maxWidth: "1700px",
               overflowX: "auto",
-              maxHeight: 500,
+              maxHeight: 520,
               overflowY: "auto",
-              margin: "32px auto 0 auto", 
+              margin: "32px auto 0 auto",
+              background: "rgba(255,255,255,0.98)",
+              borderRadius: 18,
+              boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
+              zIndex: 1,
             }}
           >
-            <table className="custom-table">
+            <table className="custom-table beautiful-table">
               <thead>
                 <tr>
                   <th style={{ fontSize: '14px', paddingLeft: 8, paddingRight: 8, paddingTop: 4, paddingBottom: 4, height: 28 }}>Factory</th>
@@ -630,47 +711,76 @@ export default function StandardTimeSimilarStructure() {
             </table>
           </div>
           <style>{`
-            .custom-table {
-              border-collapse: collapse;
+            .beautiful-table {
+              border-collapse: separate;
+              border-spacing: 0;
               width: 100%;
-              min-width: 1100px;
-              border: 1px solid #a259f7;
-              box-shadow: 0 0 0 2px #a259f7;
+              min-width: 1200px;
+              border: 2px solid #1976d2;
+              box-shadow: 0 4px 18px 0 rgba(0,87,183,0.09);
               background: #fff;
               margin: 0 auto;
+              border-radius: 18px;
+              overflow: hidden;
+              font-family: 'Segoe UI', 'Poppins', sans-serif;
             }
-            .custom-table th, .custom-table td {
-              border: 2px solid #222;
-              padding: 12px 8px;
+            .beautiful-table th, .beautiful-table td {
+              border: 1.5px solid rgba(4, 4, 4, 0.47);
+              padding: 12px 10px;
               text-align: center;
-              font-size: 16px;
+              font-size: 15px;
               white-space: nowrap;
+              background-clip: padding-box;
+              transition: background 0.18s;
             }
-            .custom-table th {
-              background: #0057b7;
+            .beautiful-table th {
+              background: linear-gradient(90deg,rgb(11, 91, 171) 60%,rgb(11, 63, 159) 100%);
               color: #fff;
-              font-weight: bold;
+              font-weight: 700;
               font-size: 17px;
-              letter-spacing: 1px;
+              letter-spacing: 0.7px;
               position: sticky;
               top: 0;
               z-index: 2;
+              border-top: none;
+              box-shadow: 0 2px 8px 0 rgba(0,87,183,0.07);
             }
-            .custom-table tr {
+            .beautiful-table tr {
               height: 44px;
-              transition: background 0.2s;
+              transition: background 0.18s;
             }
-            .custom-table tbody tr:hover {
-              background: #f3f6fa;
+            .beautiful-table tbody tr:nth-child(even) {
+              background: #f6fafd;
+            }
+            .beautiful-table tbody tr:hover {
+              background: #e3f0ff;
+            }
+            .beautiful-table td {
+              border-bottom: 1.5px solid #e0e7ef;
+              font-size: 15px;
+            }
+            .beautiful-table tr:last-child td {
+              border-bottom: none;
             }
             .action-btn {
-              transition: box-shadow 0.2s, transform 0.2s, background 0.2s, border-color 0.2s;
+              transition: box-shadow 0.18s, transform 0.18s, background 0.18s, border-color 0.18s;
+              border-radius: 12px !important;
             }
             .action-btn:hover {
-              box-shadow: 0 2px 8px rgba(0,87,183,0.10);
-              transform: translateY(-1px) scale(1.08);
-              background: #e6f0fa !important;
+              box-shadow: 0 4px 16px rgba(0,87,183,0.13);
+              transform: translateY(-2px) scale(1.10);
+              background:rgb(99, 177, 250) !important;
               border-color: #1976d2 !important;
+            }
+            @media (max-width: 1300px) {
+              .beautiful-table {
+                min-width: 900px;
+              }
+            }
+            @media (max-width: 1100px) {
+              .beautiful-table {
+                min-width: 700px;
+              }
             }
           `}</style>
         </div>
@@ -682,20 +792,20 @@ export default function StandardTimeSimilarStructure() {
         maxWidth="xs"
         fullWidth
         PaperProps={{
-          style: { textAlign: "center", padding: 24 },
+          style: { textAlign: "center", padding: 32, borderRadius: 18, background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)' },
         }}
       >
         <DialogTitle>
-          <InfoIcon style={{ fontSize: 48, color: "#6ad1f7" }} />
+          <InfoIcon style={{ fontSize: 54, color: "#1976d2" }} />
         </DialogTitle>
         <DialogContent>
-          <div style={{ fontSize: 22, fontWeight: 500, marginBottom: 16 }}>
+          <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 18, color: '#1976d2' }}>
             {dialog.message}
           </div>
           <Button
             variant="contained"
             onClick={handleCloseDialog}
-            style={{ minWidth: 80 }}
+            style={{ minWidth: 90, fontWeight: 600, fontSize: 18, borderRadius: 8 }}
           >
             OK
           </Button>

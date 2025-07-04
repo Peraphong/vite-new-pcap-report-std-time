@@ -64,9 +64,11 @@ function Login() {
   return (
     <div className="login-bg">
       <div className="login-container">
-        <img src={LoginLogo} alt="Fujikura Logo" className="Fujikura-Logo" />
-        {/* <div className="login-title">NEW PCAP SYSTEM REPORT</div> */}
-        <div className="login-subtitle"> NEW PCAP SYSTEM REPORT</div>
+        <img src={LoginLogo} alt="Fujikura Logo" className="Fujikura-Logo"  />
+        <div className="login-title" style={{ marginBottom: 2 }}>Welcome</div>
+        <div className="login-subtitle">NEW PCAP SYSTEM REPORT</div>
+        <div style={{ color: '#1976d2', fontWeight: 500, fontSize: '1.05rem', marginBottom: -25, textAlign: 'center', opacity: 0.85, letterSpacing: 0.5 }}>
+        </div>
         <form onSubmit={handleLogin}>
           <TextField
             placeholder="Username"
@@ -85,14 +87,20 @@ function Login() {
               ),
               sx: {
                 color: "#0d47a1",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0d47a1",
+                background: 'rgba(255,255,255,0.85)',
+                boxShadow: '0 2px 12px 0 rgba(66,165,245,0.08)',
+                borderRadius: '16px',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#0d47a1',
+                  borderWidth: 2,
                 },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#1976d2",
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976d2',
                 },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#42a5f5",
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#42a5f5',
+                  boxShadow: '0 0 0 3px rgba(66,165,245,0.12)',
                 },
               },
             }}
@@ -138,14 +146,20 @@ function Login() {
               ),
               sx: {
                 color: "#0d47a1",
-                "& .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#0d47a1",
+                background: 'rgba(255,255,255,0.85)',
+                boxShadow: '0 2px 12px 0 rgba(66,165,245,0.08)',
+                borderRadius: '16px',
+                fontWeight: 500,
+                '& .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#0d47a1',
+                  borderWidth: 2,
                 },
-                "&:hover .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#1976d2",
+                '&:hover .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#1976d2',
                 },
-                "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                  borderColor: "#42a5f5",
+                '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+                  borderColor: '#42a5f5',
+                  boxShadow: '0 0 0 3px rgba(66,165,245,0.12)',
                 },
               },
             }}
@@ -163,11 +177,27 @@ function Login() {
             color="primary"
             type="submit"
             fullWidth
-            sx={{ mt: 1 }}
+            sx={{
+              mt: 1,
+              fontWeight: 900,
+              fontSize: '1.18rem',
+              letterSpacing: 1.5,
+              borderRadius: '18px',
+              boxShadow: '0 8px 32px 0 rgba(25,118,210,0.18)',
+              background: 'linear-gradient(90deg, #1976d2 0%, #42a5f5 100%)',
+              transition: 'all 0.3s',
+              position: 'relative',
+              overflow: 'hidden',
+              '&:hover': {
+                background: 'linear-gradient(90deg, #125ea2 0%, #42a5f5 100%)',
+                boxShadow: '0 12px 32px 0 rgba(25,118,210,0.25)',
+                transform: 'scale(1.025)',
+              },
+            }}
             disabled={loading}
             className="login-btn"
           >
-            Login <LockOpenOutlinedIcon sx={{ ml: 1 }} />
+            {loading ? 'กำลังเข้าสู่ระบบ...' : (<><span style={{ letterSpacing: 2 }}>LOGIN</span> <LockOpenOutlinedIcon sx={{ ml: 1 }} /></>)}
           </Button>
         </form>
       </div>
