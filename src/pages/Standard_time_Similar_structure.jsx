@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Navbar from "../components/navbar/Navbar";
 import Box from "@mui/material/Box";
 import axios from "axios";
@@ -42,11 +42,20 @@ export default function StandardTimeSimilarStructure() {
   const [selectedProcess, setSelectedProcess] = useState(null);
   const [processOpen, setProcessOpen] = useState(false);
 
-  // Table
+  // Table & Pagination
   const [tableData, setTableData] = useState([]);
-  
-  //table refresh
-  const handleRefreshTable = () => { setTableData([]); };
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [jumpPageInput, setJumpPageInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  //table refresh: reset only input fields (Product/Process) but keep table and pagination
+  const handleRefreshTable = () => {
+    setSelectedProduct(null);
+    setProductInput("");
+    setSelectedProcess(null);
+    setProcessInput("");
+  };
 
   // Dialog
   const [dialog, setDialog] = useState({
@@ -54,6 +63,15 @@ export default function StandardTimeSimilarStructure() {
     message: "",
     severity: "info",
   });
+
+  // Export status state
+  const [exporting, setExporting] = useState(false);
+  const [exportProgress, setExportProgress] = useState({ percent: 0, loaded: 0, total: 0, done: false, error: false });
+  const [exportCancelToken, setExportCancelToken] = useState(null);
+  // --- Export progress bar: sync with real progress, use Swal for all notifications ---
+  const [progressPercent, setProgressPercent] = useState(0);
+  const [progressLoaded, setProgressLoaded] = useState(0);
+  const progressTimer = useRef(null);
 
   // -------------------- Effect --------------------
   useEffect(() => {
@@ -104,6 +122,30 @@ export default function StandardTimeSimilarStructure() {
     }
   }, [processInput, selectedProduct]);
 
+  // Progress bar: animate smoothly but always catch up to real percent, and only reach 100% when done
+  useEffect(() => {
+    if (exporting) {
+      setProgressPercent(0);
+      if (progressTimer.current) clearInterval(progressTimer.current);
+      progressTimer.current = setInterval(() => {
+        setProgressPercent(prev => {
+          if (exportProgress.done) return 100;
+          if (prev < exportProgress.percent) {
+            // Smoothly catch up to real percent
+            return Math.min(exportProgress.percent, prev + 2);
+          }
+          // If stuck, nudge forward slowly but never reach 100 until done
+          if (prev < 99) return prev + 1;
+          return prev;
+        });
+      }, 60);
+    } else {
+      setProgressPercent(0);
+      if (progressTimer.current) clearInterval(progressTimer.current);
+    }
+    return () => { if (progressTimer.current) clearInterval(progressTimer.current); };
+  }, [exporting, exportProgress]);
+
   // -------------------- Handler --------------------
   const handleNavbarToggle = (openStatus) => setIsNavbarOpen(openStatus);
 
@@ -113,231 +155,162 @@ export default function StandardTimeSimilarStructure() {
     setSelectedProcess(null);
     setProcessInput("");
     setTableData([]);
+    setTotal(0);
+    setPage(1);
+    setPageSize(20);
+    setJumpPageInput("");
+    setLoading(false);
+    // Reset export state if needed
+    setExporting(false);
+    setExportProgress({ percent: 0, loaded: 0, total: 0, done: false, error: false });
+    setExportCancelToken(null);
+    setProgressPercent(0);
+    setProgressLoaded(0);
   };
 
   const handleCloseDialog = () => {
     setDialog((prev) => ({ ...prev, open: false }));
   };
 
-  const handleSearch = async () => {
+  // Pagination-aware search
+  const handleSearch = async (goToPage = page, goToPageSize = pageSize) => {
+    setLoading(true);
+    const currentPage = Number(goToPage) || 1;
+    const currentPageSize = Number(goToPageSize) || 20;
+    setPage(currentPage);
+    setPageSize(currentPageSize);
+    let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+    let params = {};
+    // --- UI: Show ALL PRODUCT/ALL PROCESS in input fields if not selected ---
     if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'Please Select Data',
-        text: 'Please select Product or Process at least 1 option',
-        confirmButtonText: 'OK',
-        confirmButtonColor: '#3085d6'
-      });
-      return;
+      params = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS', page: currentPage, pageSize: currentPageSize };
+      setProductInput('ALL PRODUCT');
+      setProcessInput('ALL PROCESS');
+    } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+      params = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp, page: currentPage, pageSize: currentPageSize };
+      setProductInput('ALL PRODUCT');
+    } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+      params = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS', page: currentPage, pageSize: currentPageSize };
+      setProcessInput('ALL PROCESS');
+    } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+      params = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp, page: currentPage, pageSize: currentPageSize };
     }
-
-    // 2. เลือก Process อย่างเดียว
-    if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
-      try {
-        const res = await axios.get(
-          `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure?proc_disp=${encodeURIComponent(
-            selectedProcess.proc_disp
-          )}&prd_name=ALL PRODUCT`
-        );
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setTableData(
-            res.data.map((row) => ({
-              factory: row.factory_desc || "",
-              unit: row.unit_desc || "",
-              process: selectedProcess.proc_disp || "",
-              product: row.prd_name || "",
-              item: row.prd_item || "",
-              sec_per_pcs: row.sec_pcs ?? "",
-              remark: row.similar_type || "",
-            }))
-          );
-        } else {
-          setTableData([
-            {
-              factory: "",
-              unit: "",
-              process: selectedProcess.proc_disp,
-              product: "",
-              item: "",
-              sec_per_pcs: "",
-              remark: "ไม่มีข้อมูลจากระบบ",
-            },
-          ]);
-        }
-      } catch {
+    try {
+      const res = await axios.get(url, { params });
+      // API ควรส่ง { rows: [...], total: ... }
+      if (res.data && Array.isArray(res.data.rows)) {
+        setTableData(res.data.rows.map((row) => ({
+          factory: row.factory_desc || row.factory || "",
+          unit: row.unit_desc || row.unit || "",
+          process: row.proc_disp || row.process || params.proc_disp || "",
+          product: row.prd_name || row.product || params.prd_name || "",
+          item: row.prd_item || row.item || "",
+          sec_per_pcs: row.sec_pcs ?? row.sec_per_pcs ?? "",
+          remark: row.similar_type || row.remark || "",
+        })));
+        setTotal(res.data.total || res.data.rows.length || 0);
+      } else if (Array.isArray(res.data) && res.data.length > 0) {
+        setTableData(res.data.map((row) => ({
+          factory: row.factory_desc || row.factory || "",
+          unit: row.unit_desc || row.unit || "",
+          process: row.proc_disp || row.process || params.proc_disp || "",
+          product: row.prd_name || row.product || params.prd_name || "",
+          item: row.prd_item || row.item || "",
+          sec_per_pcs: row.sec_pcs ?? row.sec_per_pcs ?? "",
+          remark: row.similar_type || row.remark || "",
+        })));
+        setTotal(res.data.length);
+      } else {
         setTableData([
           {
             factory: "",
             unit: "",
-            process: selectedProcess.proc_disp,
-            product: "",
+            process: params.proc_disp || "",
+            product: params.prd_name || "",
             item: "",
             sec_per_pcs: "",
             remark: "ไม่มีข้อมูลจากระบบ",
           },
         ]);
+        setTotal(0);
       }
-      return;
-    }
-
-    // 3. เลือก Product อย่างเดียว
-    if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
-      const prdName = selectedProduct.prd_name;
-      try {
-        const res = await axios.get(
-          `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure?prd_name=${encodeURIComponent(
-            prdName
-          )}&proc_disp=ALL%20PROCESS`
-        );
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setTableData(
-            res.data.map((row) => ({
-              factory: row.factory_desc || "",
-              unit: row.unit_desc || "",
-              process: row.proc_disp || "",
-              product: row.prd_name || prdName,
-              item: row.prd_item || "",
-              sec_per_pcs: row.sec_pcs ?? "",
-              remark: row.similar_type || "",
-            }))
-          );
-        } else {
-          setTableData([
-            {
-              factory: "",
-              unit: "",
-              process: "",
-              product: prdName,
-              item: "",
-              sec_per_pcs: "",
-              remark: "ไม่มีข้อมูลจากระบบ",
-            },
-          ]);
-        }
-      } catch {
-        setTableData([
-          {
-            factory: "",
-            unit: "",
-            process: "",
-            product: prdName,
-            item: "",
-            sec_per_pcs: "",
-            remark: "ไม่มีข้อมูลจากระบบ",
-          },
-        ]);
-      }
-      return;
-    }
-
-    // 4. เลือก Product + Process
-    if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
-      const prdName = selectedProduct.prd_name;
-      const procDisp = selectedProcess.proc_disp;
-      try {
-        const res = await axios.get(
-          `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure?prd_name=${encodeURIComponent(
-            prdName
-          )}&proc_disp=${encodeURIComponent(procDisp)}`
-        );
-        if (Array.isArray(res.data) && res.data.length > 0) {
-          setTableData(
-            res.data.map((row) => ({
-              factory: row.factory_desc || row.factory || "",
-              unit: row.unit_desc || row.unit || "",
-              process: row.proc_disp || row.process || procDisp,
-              product: row.prd_name || row.product || prdName,
-              item: row.prd_item || row.item || "",
-              sec_per_pcs: row.sec_pcs ?? row.sec_per_pcs ?? "",
-              remark: row.similar_type || row.remark || "",
-            }))
-          );
-        } else {
-          setTableData([
-            {
-              factory: "",
-              unit: "",
-              process: procDisp,
-              product: prdName,
-              item: "",
-              sec_per_pcs: "",
-              remark: "ไม่มีข้อมูลจากระบบ",
-            },
-          ]);
-        }
-      } catch {
-        setTableData([
-          {
-            factory: "",
-            unit: "",
-            process: procDisp,
-            product: prdName,
-            item: "",
-            sec_per_pcs: "",
-            remark: "ไม่มีข้อมูลจากระบบ",
-          },
-        ]);
-      }
-      return;
+    } catch {
+      setTableData([
+        {
+          factory: "",
+          unit: "",
+          process: params.proc_disp || "",
+          product: params.prd_name || "",
+          item: "",
+          sec_per_pcs: "",
+          remark: "ไม่มีข้อมูลจากระบบ",
+        },
+      ]);
+      setTotal(0);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Export all pages to Excel with status dialog and cancel
   const handleExportExcel = async () => {
-    const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet("Sheet1");
-
-    // Header
-    const headers = [
-      "Factory",
-      "Unit",
-      "Process",
-      "Product",
-      "Item",
-      "Sec/Pcs",
-      "Remark",
-    ];
-    worksheet.addRow(headers);
-
-    // Header style
-    headers.forEach((header, idx) => {
-      const cell = worksheet.getRow(1).getCell(idx + 1);
-      cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 14 };
-      cell.fill = {
-        type: "pattern",
-        pattern: "solid",
-        fgColor: { argb: "FF0057B7" },
-      };
-      cell.alignment = { vertical: "middle", horizontal: "center" };
-      cell.border = {
-        top: { style: "thin" },
-        left: { style: "thin" },
-        bottom: { style: "thin" },
-        right: { style: "thin" },
-      };
-    });
-
-    // Data
-    if (!tableData || tableData.length === 0) {
-      worksheet.addRow(["", "", "", "", "", "", "NO DATA"]);
-    } else {
-      tableData.forEach((row) => {
-        worksheet.addRow([
-          row.factory,
-          row.unit,
-          row.process,
-          row.product,
-          row.item,
-          row.sec_per_pcs,
-          row.remark,
-        ]);
-      });
+    let cancelTokenSource = axios.CancelToken.source();
+    setExportCancelToken(cancelTokenSource);
+    // 1. Get total count first (ก่อน setExporting)
+    let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+    let paramsBase = {};
+    if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+      paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
+    } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+      paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp };
+    } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+      paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS' };
+    } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+      paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
     }
-
-    // Data style
-    worksheet.eachRow((row) => {
-      row.eachCell((cell) => {
+    let totalRows = 0;
+    try {
+      const res = await axios.get(url, { params: { ...paramsBase, page: 1, pageSize: 1 }, cancelToken: cancelTokenSource.token });
+      if (res.data && typeof res.data.total === 'number') {
+        totalRows = res.data.total;
+      } else if (Array.isArray(res.data.rows)) {
+        totalRows = res.data.rows.length;
+      } else if (Array.isArray(res.data)) {
+        totalRows = res.data.length;
+      }
+    } catch (err) {
+      setExportProgress({ percent: 0, loaded: 0, total: 0, done: true, error: true });
+      setExporting(false);
+      setExportCancelToken(null);
+      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะดึงข้อมูล', confirmButtonColor: '#1976d2' });
+      return;
+    }
+    // 2. Set progress state ก่อนเริ่ม export
+    setExportProgress({ percent: 0, loaded: 0, total: totalRows, done: false, error: false });
+    setExporting(true);
+    try {
+      const workbook = new ExcelJS.Workbook();
+      const worksheet = workbook.addWorksheet("Sheet1");
+      // Header
+      const headers = [
+        "Factory",
+        "Unit",
+        "Process",
+        "Product",
+        "Item",
+        "Sec/Pcs",
+        "Remark",
+      ];
+      worksheet.addRow(headers);
+      headers.forEach((header, idx) => {
+        const cell = worksheet.getRow(1).getCell(idx + 1);
+        cell.font = { bold: true, color: { argb: "FFFFFFFF" }, size: 14 };
+        cell.fill = {
+          type: "pattern",
+          pattern: "solid",
+          fgColor: { argb: "FF0057B7" },
+        };
         cell.alignment = { vertical: "middle", horizontal: "center" };
-        cell.font = { size: 13 };
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
@@ -345,25 +318,239 @@ export default function StandardTimeSimilarStructure() {
           right: { style: "thin" },
         };
       });
-    });
+      if (!totalRows || totalRows === 0) {
+        worksheet.addRow(["", "", "", "", "", "", "NO DATA"]);
+        await Swal.fire({ icon: 'info', title: 'No Data', text: 'ไม่มีข้อมูลสำหรับ export', confirmButtonColor: '#1976d2' });
+      } else {
+        // 3. Fetch in chunks
+        const chunkSize = 20000;
+        let loaded = 0;
+        let allRows = [];
+        for (let pageIdx = 1; allRows.length < totalRows; pageIdx++) {
+          if (exportCancelToken && exportCancelToken.token.reason) {
+            setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
+            setExporting(false);
+            setExportCancelToken(null);
+            await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'ยกเลิกการ export แล้ว', confirmButtonColor: '#1976d2' });
+            return;
+          }
+          let params = { ...paramsBase, page: pageIdx, pageSize: chunkSize };
+          let rows = [];
+          try {
+            const res = await axios.get(url, { params, cancelToken: cancelTokenSource.token });
+            if (res.data && Array.isArray(res.data.rows)) {
+              rows = res.data.rows;
+            } else if (Array.isArray(res.data) && res.data.length > 0) {
+              rows = res.data;
+            }
+          } catch (err) {
+            if (axios.isCancel(err)) {
+              setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
+              setExporting(false);
+              setExportCancelToken(null);
+              await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'ยกเลิกการ export แล้ว', confirmButtonColor: '#1976d2' });
+            } else {
+              setExportProgress({ percent: 100, loaded: allRows.length, total: totalRows, done: true, error: true });
+              setExporting(false);
+              setExportCancelToken(null);
+              await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะดึงข้อมูล', confirmButtonColor: '#1976d2' });
+            }
+            return;
+          }
+          if (!rows || rows.length === 0) break;
+          // Write each row to worksheet as soon as it's loaded
+          rows.forEach((row) => {
+            worksheet.addRow([
+              row.factory_desc || row.factory || "",
+              row.unit_desc || row.unit || "",
+              row.proc_disp || row.process || paramsBase.proc_disp || "",
+              row.prd_name || row.product || paramsBase.prd_name || "",
+              row.prd_item || row.item || "",
+              row.sec_pcs ?? row.sec_per_pcs ?? "",
+              row.similar_type || row.remark || "",
+            ]);
+          });
+          allRows = allRows.concat(rows);
+          // --- FIX: progress 100% เฉพาะเมื่อครบจริง ---
+          let percent = Math.floor((allRows.length / totalRows) * 100);
+          if (allRows.length < totalRows) {
+            percent = Math.min(percent, 99);
+          } else {
+            percent = 100;
+          }
+          setExportProgress({
+            percent,
+            loaded: allRows.length,
+            total: totalRows,
+            done: allRows.length === totalRows,
+            error: false
+          });
+          setProgressLoaded(allRows.length);
+          await new Promise((resolve) => setTimeout(resolve, 10)); // allow UI update
+        }
+        // Success Swal after download
+        // Data style
+        worksheet.eachRow((row) => {
+          row.eachCell((cell) => {
+            cell.alignment = { vertical: "middle", horizontal: "center" };
+            cell.font = { size: 13 };
+            cell.border = {
+              top: { style: "thin" },
+              left: { style: "thin" },
+              bottom: { style: "thin" },
+              right: { style: "thin" },
+            };
+          });
+        });
+        worksheet.getColumn(7).width = 95;
+        worksheet.getColumn(7).alignment = {
+          wrapText: true,
+          vertical: "middle",
+          horizontal: "center",
+        };
+        worksheet.columns.forEach((column, idx) => {
+          if (idx !== 6) column.width = 18;
+        });
+        // Download
+        const buf = await workbook.xlsx.writeBuffer();
+        saveAs(new Blob([buf]), "StandardTimeSimilarStructure.xlsx");
+        // ปิด dialog exporting ทันทีหลังโหลดเสร็จ
+        setExportProgress({ percent: 100, loaded: totalRows, total: totalRows, done: true, error: false });
+        setExporting(false);
+        setExportCancelToken(null);
+        await Swal.fire({ icon: 'success', title: 'Export Completed', text: 'บันทึกไฟล์ Excel สำเร็จ', confirmButtonColor: '#1976d2' });
+      }
+    } catch {
+      setExportProgress({ percent: 100, loaded: 0, total: 0, done: true, error: true });
+      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะ export', confirmButtonColor: '#1976d2' });
+    }
+    setExporting(false);
+    setExportCancelToken(null);
+  };
 
-    worksheet.getColumn(7).width = 95;
-    worksheet.getColumn(7).alignment = {
-      wrapText: true,
-      vertical: "middle",
-      horizontal: "center",
-    };
-
-    worksheet.columns.forEach((column, idx) => {
-      if (idx !== 6) column.width = 18;
-    });
-
-    // Download
-    const buf = await workbook.xlsx.writeBuffer();
-    saveAs(new Blob([buf]), "StandardTimeSimilarStructure.xlsx");
+  const handleCancelExport = () => {
+    if (exportCancelToken) {
+      exportCancelToken.cancel('Export cancelled by user');
+    }
   };
 
   // -------------------- Render --------------------
+  // Pagination Controls UI
+  const PaginationControls = (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '18px 0 8px 0', fontSize: '16px', fontWeight: 500 }}>
+      <button 
+        onClick={() => page > 1 && handleSearch(page - 1, pageSize)} 
+        disabled={page === 1} 
+        style={{
+          marginRight: 12,
+          padding: '6px 18px',
+          background: page === 1 ? '#e0e0e0' : '#1976d2',
+          color: page === 1 ? '#888' : '#fff',
+          border: 'none',
+          borderRadius: 6,
+          fontWeight: 600,
+          fontSize: 15,
+          cursor: page ===  1 ? 'not-allowed' : 'pointer',
+          boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+        }}
+      >Prev</button>
+      <span style={{marginRight: 12}}>Page {Number(page) || 1} / {Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1}</span>
+      <input
+        type="number"
+        min={1}
+        max={Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1}
+        value={jumpPageInput || ''}
+        onChange={e => {
+          const val = e.target.value;
+          if (/^\d*$/.test(val)) setJumpPageInput(val);
+        }}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            const maxPage = Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1;
+            let targetPage = Number(jumpPageInput);
+            if (targetPage >= 1 && targetPage <= maxPage) {
+              handleSearch(targetPage, pageSize);
+            }
+          }
+        }}
+        placeholder="Page"
+        style={{
+          width: 60,
+          marginRight: 6,
+          padding: '6px 8px',
+          fontSize: 15,
+          border: '2px solid #1976d2',
+          borderRadius: 6,
+          background: '#f5faff',
+          color: '#1976d2',
+          outline: 'none',
+          boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+        }}
+      />
+      <button
+        onClick={() => {
+          const maxPage = Number.isFinite(total) && total > 0 ? Math.ceil(Number(total) / Number(pageSize)) : 1;
+          let targetPage = Number(jumpPageInput);
+          if (targetPage >= 1 && targetPage <= maxPage) {
+            handleSearch(targetPage, pageSize);
+          }
+        }}
+        style={{
+          marginRight: 12,
+          padding: '6px 14px',
+          background: '#1976d2',
+          color: '#fff',
+          border: 'none',
+          borderRadius: 6,
+          fontWeight: 600,
+          fontSize: 15,
+          cursor: 'pointer',
+          boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+        }}
+      >Go</button>
+      <button 
+        onClick={() => (page * pageSize < total) && handleSearch(page + 1, pageSize)} 
+        disabled={page * pageSize >= total} 
+        style={{
+          marginLeft: 0,
+          marginRight: 18,
+          padding: '6px 18px',
+          background: page * pageSize >= total ? '#e0e0e0' : '#1976d2',
+          color: page * pageSize >= total ? '#888' : '#fff',
+          border: 'none',
+          borderRadius: 6,
+          fontWeight: 600,
+          fontSize: 15,
+          cursor: page * pageSize >= total ? 'not-allowed' : 'pointer',
+          boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+        }}
+      >Next</button>
+      <span style={{marginRight: 18}}>Total: {Number.isFinite(total) ? Number(total) : 0} records</span>
+      <span style={{marginLeft:16, display: 'flex', alignItems: 'center', gap: 6}}>
+        Rows per page:
+        <select 
+          value={pageSize} 
+          onChange={e => { handleSearch(1, Number(e.target.value)); }} 
+          style={{
+            marginLeft: 4,
+            padding: '6px 12px',
+            fontSize: 15,
+            fontWeight: 600,
+            border: '2px solid #1976d2',
+            borderRadius: 6,
+            background: '#f5faff',
+            color: '#1976d2',
+            outline: 'none',
+            boxShadow: '0 1px 4px 0 rgba(25,118,210,0.08)'
+          }}
+        >
+          {[20, 50, 100].map(size => (
+            <option key={size} value={size}>{size}</option>
+          ))}
+        </select>
+      </span>
+    </div>
+  );
   return (
     <>
       <div style={pageBg}></div>
@@ -383,7 +570,7 @@ export default function StandardTimeSimilarStructure() {
             maxWidth: "1700px",
             width: "96vw",
             margin: "0 auto",
-            overflow: "hidden",
+            /* overflow: "hidden",  // Removed to allow sticky header to work */
             position: 'relative',
           }}
         >
@@ -416,7 +603,7 @@ export default function StandardTimeSimilarStructure() {
           <div style={{
             width: '100%',
             textAlign: 'center',
-            marginBottom: 10,
+            marginBottom: -5,
             zIndex: 1,
           }}>
             <h1 style={{
@@ -424,7 +611,7 @@ export default function StandardTimeSimilarStructure() {
               fontWeight: 800,
               letterSpacing: 1.2,
               color: '#1976d2',
-              marginBottom: 4,
+              marginBottom: -3,
               textShadow: '0 2px 12px #b3d8ff',
               fontFamily: 'Segoe UI, Poppins, sans-serif',
             }}>
@@ -434,7 +621,7 @@ export default function StandardTimeSimilarStructure() {
               fontSize: 20,
               color: '#4a6fa1',
               fontWeight: 400,
-              marginBottom: 8,
+              marginBottom: -15,
               fontFamily: 'Segoe UI, Poppins, sans-serif',
             }}>
               Effortlessly compare and analyze standard times by product and process
@@ -446,8 +633,8 @@ export default function StandardTimeSimilarStructure() {
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              gap: 28,
-              marginBottom: -30,
+              gap: 8, // ลดช่องว่างระหว่าง Product/Process
+              marginBottom: -50,
               width: "100%",
               maxWidth: 2200,
               margin: "0 auto",
@@ -643,6 +830,7 @@ export default function StandardTimeSimilarStructure() {
                 }}
                 onClick={handleExportExcel}
                 title="Export to Excel"
+                disabled={exporting}
               >
                 <img
                   src="/excel.png"
@@ -650,13 +838,14 @@ export default function StandardTimeSimilarStructure() {
                   style={{
                     width: 26,
                     height: 26,
+                    opacity: exporting ? 0.5 : 1
                   }}
                 />
               </Button>
             </div>
           </div>
 
-          {/* Table Section */}
+          {/* Table Section + Pagination Controls Top Right */}
           <div
             style={{
               width: "100%",
@@ -670,8 +859,13 @@ export default function StandardTimeSimilarStructure() {
               borderRadius: 18,
               boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
               zIndex: 1,
+              position: 'relative',
             }}
           >
+            {/* Pagination Controls Top Right */}
+            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10, background: 'rgba(255,255,255,0.98)', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
+              {PaginationControls}
+            </div>
             <table className="custom-table beautiful-table">
               <thead>
                 <tr>
@@ -811,6 +1005,129 @@ export default function StandardTimeSimilarStructure() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Export Progress Dialog */}
+      {exporting && (
+        <Dialog open={true} maxWidth="xs" fullWidth PaperProps={{
+          style: {
+            background: '#fff',
+            boxShadow: '0 8px 32px 0 rgba(76, 153, 235, 0.18)',
+            borderRadius: 24,
+            padding: 0,
+            overflow: 'visible',
+            backdropFilter: 'blur(8px)',
+            border: '1.5px solid #1976d2',
+            minWidth: 380,
+            maxWidth: 480,
+            position: 'relative',
+          }
+        }}>
+          <DialogTitle style={{
+            textAlign: 'center',
+            fontWeight: 800,
+            color: '#1976d2',
+            fontSize: 30,
+            letterSpacing: 1.2,
+            background: 'linear-gradient(90deg,rgb(0, 132, 255) 60%,rgb(11, 128, 238) 100%)',
+            borderTopLeftRadius: 24,
+            borderTopRightRadius: 24,
+            padding: '28px 0 18px 0',
+            marginBottom: 0,
+            boxShadow: '0 2px 12px 0 rgba(255, 255, 255, 0.08)',
+          }}>
+            <span style={{
+              fontWeight: 900,
+              fontSize: 32,
+              letterSpacing: 1.2,
+              color: 'rgb(255, 255, 255)',
+            }}>EXPORTING EXCEL</span>
+          </DialogTitle>
+          <DialogContent style={{
+            textAlign: 'center',
+            padding: '32px 32px 24px 32px',
+            background: 'transparent',
+            borderBottomLeftRadius: 24,
+            borderBottomRightRadius: 24,
+            position: 'relative',
+          }}>
+            <div style={{ margin: '18px 0 12px 0', width: '100%' }}>
+              {/* Glassy progress bar */}
+              <div style={{
+                width: '100%',
+                height: 22,
+                background: 'rgba(230,240,255,0.7)',
+                borderRadius: 12,
+                overflow: 'hidden',
+                marginBottom: 18,
+                boxShadow: '0 2px 12px 0 #b3d8ff',
+                border: '1.5px solid #1976d2',
+                position: 'relative',
+              }}>
+                <div style={{
+                  width: `${progressPercent}%`,
+                  height: '100%',
+                  background: 'linear-gradient(90deg, #1976d2 60%, #0baae5 100%)',
+                  transition: 'width 0.25s cubic-bezier(.4,2,.6,1)',
+                  borderRadius: 12,
+                  boxShadow: '0 2px 12px 0 #b3d8ff',
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                }} />
+                {/* Animated shimmer */}
+                <div style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  width: `${progressPercent}%`,
+                  height: '100%',
+                  background: 'linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.18) 100%)',
+                  animation: 'shimmer 1.2s infinite',
+                  borderRadius: 12,
+                  pointerEvents: 'none',
+                  zIndex: 2,
+                }} />
+              </div>
+              <div style={{ fontSize: 22, fontWeight: 700, color: '#1976d2', marginBottom: 8, letterSpacing: 0.5 }}>
+                Progress: <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(progressPercent))}%</span>
+              </div>
+              <div style={{ fontSize: 17, color: '#1976d2', marginBottom: 8, fontWeight: 500 }}>
+                Loaded <span style={{ color: '#1976d2', fontWeight: 700 }}>{progressLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{exportProgress.total.toLocaleString()}</span> rows
+              </div>
+              {/* --- Add page/chunk info --- */}
+              {exportProgress.total > 0 && (
+                <div style={{ fontSize: 15, color: '#1976d2', marginBottom: 2, fontWeight: 500 }}>
+                  Page <span style={{ color: '#1976d2', fontWeight: 700 }}>{Math.max(1, Math.ceil(progressLoaded / 20000))}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{Math.max(1, Math.ceil(exportProgress.total / 20000))}</span>
+                </div>
+              )}
+            </div>
+            {!exportProgress.done && (
+              <Button variant="contained" color="error" style={{
+                marginTop: 18,
+                fontWeight: 800,
+                fontSize: 20,
+                borderRadius: 12,
+                padding: '12px 38px',
+                background: 'linear-gradient(90deg, #e53935 60%,rgb(214, 50, 56) 100%)',
+                color: '#fff',
+                boxShadow: '0 2px 12px 0 #e53935',
+                letterSpacing: 1.1,
+                textShadow: '0 1px 8px #e53935',
+                border: 'none',
+                transition: 'background 0.18s, box-shadow 0.18s',
+              }} onClick={handleCancelExport}>
+                CANCEL
+              </Button>
+            )}
+            <style>{`
+              @keyframes shimmer {
+                0% { background-position: -200px 0; }
+                100% { background-position: 200px 0; }
+              }
+            `}</style>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 }

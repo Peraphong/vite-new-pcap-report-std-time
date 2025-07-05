@@ -605,6 +605,7 @@ export default function StandardTimeReportByProduct() {
       }
       return;
     }
+    
     axios.get(`http://10.17.100.115:3001/api/smart_pcap/filter-unit-list-std-time?factory=${filters.factory}`)
       .then(res => {
         const arr = Array.isArray(res.data) ? res.data : [];
@@ -1010,7 +1011,7 @@ export default function StandardTimeReportByProduct() {
               minHeight: '350px',
               height: 'calc(100vh - 270px)', 
               background: '#fff',
-              border: '2px solid rgb(0, 0, 0)',
+              border: '2px solid rgb(8, 50, 216)',
               borderRadius: '10px',
               boxShadow: '0 2px 12px 0 hsla(254, 76.90%, 74.50%, 0.08)',
               overflowX: 'auto', 
