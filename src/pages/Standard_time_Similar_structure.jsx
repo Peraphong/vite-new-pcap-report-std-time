@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/navbar/Navbar";
 import Box from "@mui/material/Box";
 import axios from "axios";
@@ -15,6 +15,74 @@ import ExcelJS from "exceljs";
 import Swal from 'sweetalert2';
 
 export default function StandardTimeSimilarStructure() {
+  // --- ดึงข้อมูล user และเตรียมค่าต่าง ๆ แบบปลอดภัย ---
+  let userName = '';
+  let userSurname = '';
+  let ShortSurname = '';
+  let update_by = '';
+  let userEmpID = '';
+  let userUpperName = '';
+  let UpperUpdate_By = '';
+  try {
+    const userString = localStorage.getItem("userToken");
+    if (userString) {
+      const userObject = JSON.parse(userString);
+      userName = userObject?.user_name || '';
+      userSurname = userObject?.user_surname || '';
+      ShortSurname = userSurname?.charAt(0) || '';
+      update_by = userName + '.' + ShortSurname;
+      userEmpID = userObject?.emp_id || '';
+      userUpperName = userName?.toUpperCase() || '';
+      userObject.update_by = update_by;
+      UpperUpdate_By = userObject?.update_by?.toUpperCase() || '';
+      // log สำหรับ debug
+      console.log({ userName, userSurname, ShortSurname, update_by, userEmpID, userUpperName, UpperUpdate_By });
+    }
+  } catch (e) {
+    // ถ้า error จะได้ string ว่างทั้งหมด
+  }
+
+  // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
+  const handleSendTableData = async () => {
+    // Check if tableData is empty or total is 0
+    if (!tableData || tableData.length === 0 || total === 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'No Table Selected',
+        text: 'No table data selected. Please select data before updating.',
+        confirmButtonColor: '#1976d2'
+      });
+      return;
+    }
+    const result = await Swal.fire({
+      title: 'Confirm Update?',
+      text: `Do you want to update all data (${total.toLocaleString()} records) to the system?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#1976d2',
+      cancelButtonColor: '#e53935',
+      reverseButtons: true
+    });
+    if (result.isConfirmed) {
+      // LOG เฉพาะ field ที่ต้องการตรวจสอบ
+      const logData = tableData.map(row => ({
+        prd_item: row.prd_item || row.item || '',
+        proc_id: row.proc_id || '',
+        sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
+        create_by: row.create_by || '',
+        update_by: row.update_by || '',
+        similar_type: row.similar_type || row.remark || '',
+      }));
+      console.log(`[MOCK] Sending data. Total: ${total} records`, logData);
+      setDialog({
+        open: true,
+        message: `Preparing to send ${total.toLocaleString()} records to the API (mock only, not connected to real API).`,
+        severity: "info",
+      });
+    }
+  };
   // Modern gradient background for the whole page
   const pageBg = {
     minHeight: '100vh',
@@ -229,7 +297,7 @@ export default function StandardTimeSimilarStructure() {
             product: params.prd_name || "",
             item: "",
             sec_per_pcs: "",
-            remark: "ไม่มีข้อมูลจากระบบ",
+            remark: "No data from the system.",
           },
         ]);
         setTotal(0);
@@ -243,7 +311,7 @@ export default function StandardTimeSimilarStructure() {
           product: params.prd_name || "",
           item: "",
           sec_per_pcs: "",
-          remark: "ไม่มีข้อมูลจากระบบ",
+          remark: "No data from the system.",
         },
       ]);
       setTotal(0);
@@ -254,6 +322,16 @@ export default function StandardTimeSimilarStructure() {
 
   // Export all pages to Excel with status dialog and cancel
   const handleExportExcel = async () => {
+    // Check if tableData is empty or total is 0
+    if (!tableData || tableData.length === 0 || total === 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'No Table Selected',
+        text: 'No table data selected. Please select data before exporting.',
+        confirmButtonColor: '#1976d2'
+      });
+      return;
+    }
     let cancelTokenSource = axios.CancelToken.source();
     setExportCancelToken(cancelTokenSource);
     // 1. Get total count first (ก่อน setExporting)
@@ -282,7 +360,7 @@ export default function StandardTimeSimilarStructure() {
       setExportProgress({ percent: 0, loaded: 0, total: 0, done: true, error: true });
       setExporting(false);
       setExportCancelToken(null);
-      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะดึงข้อมูล', confirmButtonColor: '#1976d2' });
+      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'An error occurred while fetching data.', confirmButtonColor: '#1976d2' });
       return;
     }
     // 2. Set progress state ก่อนเริ่ม export
@@ -320,7 +398,7 @@ export default function StandardTimeSimilarStructure() {
       });
       if (!totalRows || totalRows === 0) {
         worksheet.addRow(["", "", "", "", "", "", "NO DATA"]);
-        await Swal.fire({ icon: 'info', title: 'No Data', text: 'ไม่มีข้อมูลสำหรับ export', confirmButtonColor: '#1976d2' });
+        await Swal.fire({ icon: 'info', title: 'No Data', text: 'No data available for export.', confirmButtonColor: '#1976d2' });
       } else {
         // 3. Fetch in chunks
         const chunkSize = 20000;
@@ -331,7 +409,7 @@ export default function StandardTimeSimilarStructure() {
             setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
             setExporting(false);
             setExportCancelToken(null);
-            await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'ยกเลิกการ export แล้ว', confirmButtonColor: '#1976d2' });
+            await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'Export has been cancelled.', confirmButtonColor: '#1976d2' });
             return;
           }
           let params = { ...paramsBase, page: pageIdx, pageSize: chunkSize };
@@ -348,12 +426,12 @@ export default function StandardTimeSimilarStructure() {
               setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
               setExporting(false);
               setExportCancelToken(null);
-              await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'ยกเลิกการ export แล้ว', confirmButtonColor: '#1976d2' });
+              await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'Export has been cancelled.', confirmButtonColor: '#1976d2' });
             } else {
               setExportProgress({ percent: 100, loaded: allRows.length, total: totalRows, done: true, error: true });
               setExporting(false);
               setExportCancelToken(null);
-              await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะดึงข้อมูล', confirmButtonColor: '#1976d2' });
+              await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'An error occurred while fetching data.', confirmButtonColor: '#1976d2' });
             }
             return;
           }
@@ -418,11 +496,11 @@ export default function StandardTimeSimilarStructure() {
         setExportProgress({ percent: 100, loaded: totalRows, total: totalRows, done: true, error: false });
         setExporting(false);
         setExportCancelToken(null);
-        await Swal.fire({ icon: 'success', title: 'Export Completed', text: 'บันทึกไฟล์ Excel สำเร็จ', confirmButtonColor: '#1976d2' });
+        await Swal.fire({ icon: 'success', title: 'Export Completed', text: 'Excel file saved successfully.', confirmButtonColor: '#1976d2' });
       }
     } catch {
       setExportProgress({ percent: 100, loaded: 0, total: 0, done: true, error: true });
-      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'เกิดข้อผิดพลาดขณะ export', confirmButtonColor: '#1976d2' });
+      await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'An error occurred during export.', confirmButtonColor: '#1976d2' });
     }
     setExporting(false);
     setExportCancelToken(null);
@@ -839,6 +917,33 @@ export default function StandardTimeSimilarStructure() {
                     width: 26,
                     height: 26,
                     opacity: exporting ? 0.5 : 1
+                  }}
+                />
+              </Button>
+              <Button
+                className="action-btn"
+                variant="outlined"
+                color="secondary"
+                style={{
+                  width: 48,
+                  height: 48,
+                  minWidth: 48,
+                  minHeight: 48,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 0,
+                  fontSize: 18,
+                }}
+                onClick={handleSendTableData}
+                title="Send Table Data"
+              >
+                <img
+                  src="/update.png"
+                  alt="Send"
+                  style={{
+                    width: 26,
+                    height: 26,
                   }}
                 />
               </Button>
