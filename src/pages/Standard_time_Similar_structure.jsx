@@ -23,76 +23,38 @@ export default function StandardTimeSimilarStructure() {
   let userEmpID = '';
   let userUpperName = '';
   let UpperUpdate_By = '';
-  try {
-    const userString = localStorage.getItem("userToken");
-    if (userString) {
-      const userObject = JSON.parse(userString);
-      userName = userObject?.user_name || '';
-      userSurname = userObject?.user_surname || '';
-      ShortSurname = userSurname?.charAt(0) || '';
-      update_by = userName + '.' + ShortSurname;
-      userEmpID = userObject?.emp_id || '';
-      userUpperName = userName?.toUpperCase() || '';
-      userObject.update_by = update_by;
-      UpperUpdate_By = userObject?.update_by?.toUpperCase() || '';
-      // log สำหรับ debug
-      console.log({ userName, userSurname, ShortSurname, update_by, userEmpID, userUpperName, UpperUpdate_By });
+  // ดึง user info แค่รอบเดียว ไม่ log ทุก render
+  const userInfoRef = useRef(null);
+  if (userInfoRef.current === null) {
+    try {
+      const userString = localStorage.getItem("userToken");
+      if (userString) {
+        const userObject = JSON.parse(userString);
+        userName = userObject?.user_name || '';
+        userSurname = userObject?.user_surname || '';
+        ShortSurname = userSurname?.charAt(0) || '';
+        update_by = userName + '.' + ShortSurname;
+        userEmpID = userObject?.emp_id || '';
+        userUpperName = userName?.toUpperCase() || '';
+        userObject.update_by = update_by;
+        UpperUpdate_By = userObject?.update_by?.toUpperCase() || '';
+        // log สำหรับ debug (แค่รอบเดียว)
+        console.log({ userName, userSurname, ShortSurname, update_by, userEmpID, userUpperName, UpperUpdate_By });
+        userInfoRef.current = { userName, userSurname, ShortSurname, update_by, userEmpID, userUpperName, UpperUpdate_By };
+      }
+    } catch (e) {
+      // ถ้า error จะได้ string ว่างทั้งหมด
+      userInfoRef.current = {};
     }
-  } catch (e) {
-    // ถ้า error จะได้ string ว่างทั้งหมด
+  } else {
+    // ใช้ค่าจาก ref
+    ({ userName, userSurname, ShortSurname, update_by, userEmpID, userUpperName, UpperUpdate_By } = userInfoRef.current);
   }
 
-  // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
-  const handleSendTableData = async () => {
-    // Check if tableData is empty or total is 0
-    if (!tableData || tableData.length === 0 || total === 0) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'No Table Selected',
-        text: 'No table data selected. Please select data before updating.',
-        confirmButtonColor: '#1976d2'
-      });
-      return;
-    }
-    const result = await Swal.fire({
-      title: 'Confirm Update?',
-      text: `Do you want to update all data (${total.toLocaleString()} records) to the system?`,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
-      confirmButtonColor: '#1976d2',
-      cancelButtonColor: '#e53935',
-      reverseButtons: true
-    });
-    if (result.isConfirmed) {
-      // LOG เฉพาะ field ที่ต้องการตรวจสอบ
-      const logData = tableData.map(row => ({
-        prd_item: row.prd_item || row.item || '',
-        proc_id: row.proc_id || '',
-        sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
-        create_by: row.create_by || '',
-        update_by: row.update_by || '',
-        similar_type: row.similar_type || row.remark || '',
-      }));
-      console.log(`[MOCK] Sending data. Total: ${total} records`, logData);
-      setDialog({
-        open: true,
-        message: `Preparing to send ${total.toLocaleString()} records to the API (mock only, not connected to real API).`,
-        severity: "info",
-      });
-    }
-  };
-  // Modern gradient background for the whole page
-  const pageBg = {
-    minHeight: '100vh',
-    width: '100vw',
-    background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    zIndex: -1,
-  };
+  // --- Loading percent state for overlay (only for sand to data) ---
+  const [loadingPercent, setLoadingPercent] = useState(0);
+  const [loadingLoaded, setLoadingLoaded] = useState(0);
+  const [loadingSandToData, setLoadingSandToData] = useState(false);
   // -------------------- State --------------------
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
@@ -214,7 +176,125 @@ export default function StandardTimeSimilarStructure() {
     return () => { if (progressTimer.current) clearInterval(progressTimer.current); };
   }, [exporting, exportProgress]);
 
-  // -------------------- Handler --------------------
+
+  // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
+  const handleSendTableData = async () => {
+    // Check if tableData is empty or total is 0
+    if (!total || total === 0) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'No Data',
+        text: 'Please select table data before updating.',
+        confirmButtonColor: '#1976d2'
+      });
+      return;
+    }
+    const result = await Swal.fire({
+      title: 'Confirm Update?',
+      text: `Do you want to update all data (${total.toLocaleString()} records) to the system?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Yes',
+      cancelButtonText: 'No',
+      confirmButtonColor: '#1976d2',
+      cancelButtonColor: '#e53935',
+      reverseButtons: true
+    });
+    if (result.isConfirmed) {
+      setLoadingSandToData(true);
+      setLoadingPercent(0);
+      setLoadingLoaded(0);
+      // Fetch all rows of selected product/process
+      let allData = [];
+      let pageIdx = 1;
+      const pageSizeFetch = 10000;
+      let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+      let paramsBase = {};
+      if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+        paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
+      } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+        paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp };
+      } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+        paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS' };
+      } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+        paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
+      }
+      let totalRows = total;
+      // Fetch first page to get total count if API provides total
+      try {
+        const res = await axios.get(url, { params: { ...paramsBase, page: 1, pageSize: 1 } });
+        if (res.data && typeof res.data.total === 'number') {
+          totalRows = res.data.total;
+        } else if (Array.isArray(res.data.rows)) {
+          totalRows = res.data.rows.length;
+        } else if (Array.isArray(res.data)) {
+          totalRows = res.data.length;
+        }
+      } catch {}
+      // Fetch all pages
+      while (allData.length < totalRows) {
+        try {
+          const res = await axios.get(url, { params: { ...paramsBase, page: pageIdx, pageSize: pageSizeFetch } });
+          let rows = [];
+          if (res.data && Array.isArray(res.data.rows)) {
+            rows = res.data.rows;
+          } else if (Array.isArray(res.data) && res.data.length > 0) {
+            rows = res.data;
+          }
+          if (!rows || rows.length === 0) break;
+          allData = allData.concat(rows);
+          // Update progress
+          let percent = Math.floor((allData.length / totalRows) * 100);
+          if (allData.length < totalRows) {
+            percent = Math.min(percent, 99);
+          } else {
+            percent = 100;
+          }
+          setLoadingPercent(percent);
+          setLoadingLoaded(allData.length);
+          if (rows.length < pageSizeFetch) break;
+          pageIdx++;
+        } catch (err) {
+          break;
+        }
+      }
+      // LOG only the required fields (English)
+      const logData = allData.map(row => ({
+        prd_item: row.prd_item || row.item || '',
+        proc_id: row.proc_id || '',
+        sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
+        create_by: row.create_by || '',
+        update_by: row.update_by || '',
+        similar_type: row.similar_type || row.remark || '',
+      }));
+      logData.forEach((item, idx) => {
+        console.log(`Record ${idx + 1}:`);
+        Object.entries(item).forEach(([key, value]) => {
+          console.log(`  ${key}: ${value}`);
+        });
+      });
+      setDialog({
+        open: true,
+        message: `Preparing to send ${logData.length.toLocaleString()} records (mock only, not connected to real API)`,
+        severity: "info",
+      });
+      setLoadingSandToData(false);
+      setLoadingPercent(0);
+      setLoadingLoaded(0);
+    }
+  };
+  // Modern gradient background for the whole page
+  const pageBg = {
+    minHeight: '100vh',
+    width: '100vw',
+    background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    zIndex: -1,
+  };
+
+  // -------------------- Handler (single definition zone) --------------------
   const handleNavbarToggle = (openStatus) => setIsNavbarOpen(openStatus);
 
   const handleClearSearch = () => {
@@ -242,7 +322,7 @@ export default function StandardTimeSimilarStructure() {
 
   // Pagination-aware search
   const handleSearch = async (goToPage = page, goToPageSize = pageSize) => {
-    setLoading(true);
+    // setLoading(true); // Remove loading overlay for search
     const currentPage = Number(goToPage) || 1;
     const currentPageSize = Number(goToPageSize) || 20;
     setPage(currentPage);
@@ -316,7 +396,7 @@ export default function StandardTimeSimilarStructure() {
       ]);
       setTotal(0);
     } finally {
-      setLoading(false);
+      // setLoading(false); // Remove loading overlay for search
     }
   };
 
@@ -632,6 +712,45 @@ export default function StandardTimeSimilarStructure() {
   return (
     <>
       <div style={pageBg}></div>
+      {/* Loading Overlay: show only when loadingSandToData is true */}
+      {loadingSandToData && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(255,255,255,0.55)',
+          zIndex: 9999,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 18,
+            padding: 32,
+            background: 'rgba(255,255,255,0.95)',
+            borderRadius: 18,
+            boxShadow: '0 4px 24px 0 rgba(25,118,210,0.13)',
+            border: '2px solid #1976d2',
+            minWidth: 320,
+          }}>
+            <svg width="60" height="60" viewBox="0 0 50 50" style={{ marginBottom: 8 }}>
+              <circle cx="25" cy="25" r="20" fill="none" stroke="#1976d2" strokeWidth="6" strokeDasharray="31.4 31.4" strokeLinecap="round">
+                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.9s" repeatCount="indefinite" />
+              </circle>
+            </svg>
+            <div style={{ fontSize: 22, color: '#1976d2', fontWeight: 700 }}>Loading... <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(loadingPercent))}%</span></div>
+            <div style={{ fontSize: 16, color: '#1976d2', fontWeight: 400 }}>กำลังดึงข้อมูลทั้งหมด กรุณารอสักครู่</div>
+            <div style={{ fontSize: 15, color: '#1976d2', fontWeight: 400 }}>
+              Loaded <span style={{ color: '#1976d2', fontWeight: 700 }}>{loadingLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{total.toLocaleString()}</span> records
+            </div>
+          </div>
+        </div>
+      )}
       <Navbar onToggle={handleNavbarToggle} />
       <Box marginLeft={isNavbarOpen ? "220px" : 4} marginTop={8}>
         <div
@@ -639,7 +758,7 @@ export default function StandardTimeSimilarStructure() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: 40,
+            padding: "12px 40px 40px 40px", // ลด padding-top ให้หัวข้อชิดขอบบน
             gap: "24px",
             background: "rgba(255,255,255,0.92)",
             minHeight: "700px",
@@ -681,7 +800,8 @@ export default function StandardTimeSimilarStructure() {
           <div style={{
             width: '100%',
             textAlign: 'center',
-            marginBottom: -5,
+            marginBottom: 0,
+            marginTop: 0,
             zIndex: 1,
           }}>
             <h1 style={{
@@ -689,7 +809,8 @@ export default function StandardTimeSimilarStructure() {
               fontWeight: 800,
               letterSpacing: 1.2,
               color: '#1976d2',
-              marginBottom: -3,
+              marginBottom: 0,
+              marginTop: 0,
               textShadow: '0 2px 12px #b3d8ff',
               fontFamily: 'Segoe UI, Poppins, sans-serif',
             }}>
@@ -699,7 +820,8 @@ export default function StandardTimeSimilarStructure() {
               fontSize: 20,
               color: '#4a6fa1',
               fontWeight: 400,
-              marginBottom: -15,
+              marginBottom: 0,
+              marginTop: 0,
               fontFamily: 'Segoe UI, Poppins, sans-serif',
             }}>
               Effortlessly compare and analyze standard times by product and process
@@ -712,7 +834,7 @@ export default function StandardTimeSimilarStructure() {
               flexDirection: "row",
               alignItems: "center",
               gap: 8, // ลดช่องว่างระหว่าง Product/Process
-              marginBottom: -50,
+              marginBottom: 0,
               width: "100%",
               maxWidth: 2200,
               margin: "0 auto",
@@ -950,7 +1072,29 @@ export default function StandardTimeSimilarStructure() {
             </div>
           </div>
 
-          {/* Table Section + Pagination Controls Top Right */}
+          {/* Sticky Pagination Controls above the table, outside scrollable area */}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: 1700,
+              minWidth: 1200,
+              margin: '-30px auto 0 auto',
+              position: 'sticky',
+              top: 0,
+              zIndex: 30,
+              background: 'rgba(255,255,255,0.98)',
+              borderTopLeftRadius: 18,
+              borderTopRightRadius: 18,
+              boxShadow: '0 2px 12px 0 rgba(0,87,183,0.07)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              padding: '12px 24px 8px 24px',
+            }}
+          >
+            {PaginationControls}
+          </div>
+          {/* Scrollable table container */}
           <div
             style={{
               width: "100%",
@@ -959,18 +1103,16 @@ export default function StandardTimeSimilarStructure() {
               overflowX: "auto",
               maxHeight: 520,
               overflowY: "auto",
-              margin: "32px auto 0 auto",
               background: "rgba(255,255,255,0.98)",
               borderRadius: 18,
               boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
               zIndex: 1,
               position: 'relative',
+              border: '1px solid rgb(0, 0, 0)',
+              boxSizing: 'border-box',
+              margin: 0,
             }}
           >
-            {/* Pagination Controls Top Right */}
-            <div style={{ width: '100%', display: 'flex', justifyContent: 'flex-end', alignItems: 'center', position: 'sticky', top: 0, zIndex: 10, background: 'rgba(255,255,255,0.98)', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
-              {PaginationControls}
-            </div>
             <table className="custom-table beautiful-table">
               <thead>
                 <tr>
@@ -1015,12 +1157,12 @@ export default function StandardTimeSimilarStructure() {
               border-spacing: 0;
               width: 100%;
               min-width: 1200px;
-              border: 2px solid #1976d2;
+              /* border: 2px solid #1976d2;  // ย้าย border ไปที่ div container */
               box-shadow: 0 4px 18px 0 rgba(0,87,183,0.09);
               background: #fff;
               margin: 0 auto;
-              border-radius: 18px;
-              overflow: hidden;
+              border-radius: 16px;
+              overflow: visible;
               font-family: 'Segoe UI', 'Poppins', sans-serif;
             }
             .beautiful-table th, .beautiful-table td {
@@ -1040,9 +1182,15 @@ export default function StandardTimeSimilarStructure() {
               letter-spacing: 0.7px;
               position: sticky;
               top: 0;
-              z-index: 2;
+              z-index: 20;
               border-top: none;
               box-shadow: 0 2px 8px 0 rgba(0,87,183,0.07);
+              background-clip: padding-box;
+            }
+            .beautiful-table thead {
+              position: sticky;
+              top: 0;
+              z-index: 19;
             }
             .beautiful-table tr {
               height: 44px;
@@ -1058,9 +1206,7 @@ export default function StandardTimeSimilarStructure() {
               border-bottom: 1.5px solid #e0e7ef;
               font-size: 15px;
             }
-            .beautiful-table tr:last-child td {
-              border-bottom: none;
-            }
+            /* Remove border-bottom: none for last row to always show bottom border */
             .action-btn {
               transition: box-shadow 0.18s, transform 0.18s, background 0.18s, border-color 0.18s;
               border-radius: 12px !important;
