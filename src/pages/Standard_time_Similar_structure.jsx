@@ -283,15 +283,19 @@ export default function StandardTimeSimilarStructure() {
       setLoadingLoaded(0);
     }
   };
-  // Modern gradient background for the whole page
+  // Modern, beautiful background for the whole page
   const pageBg = {
     minHeight: '100vh',
     width: '100vw',
-    background: 'linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%)',
+    background: `
+      radial-gradient(ellipse at 80% 0%, #e3f0ff 0%, #fafdff 60%, #e3f0ff 100%),
+      linear-gradient(120deg, #e3f0ff 0%, #fafdff 100%)
+    `,
     position: 'absolute',
     top: 0,
     left: 0,
     zIndex: -1,
+    overflow: 'hidden',
   };
 
   // -------------------- Handler (single definition zone) --------------------
@@ -758,43 +762,70 @@ export default function StandardTimeSimilarStructure() {
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            padding: "12px 40px 40px 40px", // ลด padding-top ให้หัวข้อชิดขอบบน
+            padding: "12px 40px 40px 40px",
             gap: "24px",
             background: "rgba(255,255,255,0.92)",
             minHeight: "700px",
             borderRadius: 28,
-            boxShadow: "0 8px 32px 0 rgba(0,87,183,0.13)",
+            boxShadow: "0 10px 40px 0 rgba(0,0,0,0.13), 0 2px 12px 0 rgba(0,0,0,0.10)",
             maxWidth: "1700px",
             width: "96vw",
             margin: "0 auto",
-            /* overflow: "hidden",  // Removed to allow sticky header to work */
             position: 'relative',
+            border: '1.5px solid #e3eaf7',
+            backdropFilter: 'blur(2.5px)',
+            transition: 'box-shadow 0.22s',
           }}
         >
-          {/* Decorative floating shapes */}
+          {/* Minimal floating shapes for soft depth */}
+          {/* Decorative floating shapes for extra depth */}
           <div style={{
             position: 'absolute',
             top: -60,
-            right: 40,
+            right: 60,
             width: 120,
             height: 120,
-            background: 'radial-gradient(circle at 40% 60%,rgb(8, 170, 229) 0%, #1976d2 100%)',
-            opacity: 0.18,
+            background: 'radial-gradient(circle at 100% 100%,rgba(55, 147, 245, 0.66) 0%, #e3f0ff 80%)',
             borderRadius: '50%',
             zIndex: 0,
-            filter: 'blur(2px)'
+            filter: 'blur(18px)',
+            opacity: 0.45,
+          }} />
+          {/* <div style={{
+            position: 'absolute',
+            bottom: -50,
+            left: 80,
+            width: 100,
+            height: 100,
+            background: 'radial-gradient(circle at 40% 60%, #0baae5 0%, #e3f0ff 90%)',
+            borderRadius: '50%',
+            zIndex: 0,
+            filter: 'blur(18px)',
+            opacity: 0.32,
+          }} /> */}
+          <div style={{
+            position: 'absolute',
+            top: 120,
+            left: -60,
+            width: 120,
+            height: 120,
+            background: 'radial-gradient(circle at 60% 40%, #e3f0ff 0%, #b3d8ff 80%)',
+            borderRadius: '50%',
+            zIndex: 0,
+            filter: 'blur(24px)',
+            opacity: 0.22,
           }} />
           <div style={{
             position: 'absolute',
-            bottom: -50,
-            left: 60,
-            width: 90,
-            height: 90,
-            background: 'radial-gradient(circle at 60% 40%, #ffb6b9 0%, #f7cac9 100%)',
-            opacity: 0.13,
+            bottom: 120,
+            right: -60,
+            width: 120,
+            height: 120,
+            background: 'radial-gradient(circle at 40% 60%, #e3f0ff 0%, #0baae5 90%)',
             borderRadius: '50%',
             zIndex: 0,
-            filter: 'blur(2px)'
+            filter: 'blur(24px)',
+            opacity: 0.18,
           }} />
           {/* Title Section */}
           <div style={{
@@ -805,19 +836,18 @@ export default function StandardTimeSimilarStructure() {
             zIndex: 1,
           }}>
             <h1 style={{
-              fontSize: 38,
-              fontWeight: 800,
-              letterSpacing: 1.2,
+              fontSize: 34,
+              fontWeight: 700,
+              letterSpacing: 1.1,
               color: '#1976d2',
               marginBottom: 0,
               marginTop: 0,
-              textShadow: '0 2px 12px #b3d8ff',
               fontFamily: 'Segoe UI, Poppins, sans-serif',
             }}>
               Standard Time Similar Structure
             </h1>
             <div style={{
-              fontSize: 20,
+              fontSize: 18,
               color: '#4a6fa1',
               fontWeight: 400,
               marginBottom: 0,
@@ -828,25 +858,31 @@ export default function StandardTimeSimilarStructure() {
             </div>
           </div>
           {/* Search Section */}
+          {/* Top search/filter bar with floating style */}
           <div
             style={{
               display: "flex",
               flexDirection: "row",
               alignItems: "center",
-              gap: 8, // ลดช่องว่างระหว่าง Product/Process
+              gap: 16,
               marginBottom: 0,
               width: "100%",
               maxWidth: 2200,
               margin: "0 auto",
-              background: "linear-gradient(90deg, #e3f0ff 60%, #f7fafd 100%)",
-              borderRadius: 18,
-              boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
-              padding: 28,
-              zIndex: 1,
+              background: "linear-gradient(120deg,rgb(216, 232, 249) 60%,rgba(244, 251, 255, 0.5) 100%)",
+              borderRadius: 22,
+              boxShadow: "0 8px 32px 0 rgba(25,118,210,0.10)",
+              border: "1.5px solid #e3eaf7",
+              padding: '28px 32px',
+              zIndex: 2,
+              position: 'relative',
+              top: 0,
+              left: 0,
+              transition: 'box-shadow 0.2s',
             }}
           >
             {/* Product Autocomplete */}
-            <div style={{ minWidth: 270, flex: 1 }}>
+            <div style={{ minWidth: 270, flex: 1, background: 'none', boxShadow: 'none', border: 'none', padding: 0 }}>
               <Autocomplete
                 open={productOpen}
                 onOpen={() => setProductOpen(true)}
@@ -881,14 +917,14 @@ export default function StandardTimeSimilarStructure() {
                     label="Product Name"
                     variant="outlined"
                     size="medium"
-                    style={{ width: 270, background: '#fff', borderRadius: 8 }}
+                    style={{ width: 270, background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px 0 rgba(25,118,210,0.07)', border: '1.5px solid #e3eaf7' }}
                   />
                 )}
                 style={{ width: "100%" }}
               />
             </div>
             {/* Process Autocomplete */}
-            <div style={{ minWidth: 270, flex: 1 }}>
+            <div style={{ minWidth: 270, flex: 1, background: 'none', boxShadow: 'none', border: 'none', padding: 0 }}>
               <Autocomplete
                 open={processOpen}
                 onOpen={() => setProcessOpen(true)}
@@ -919,7 +955,7 @@ export default function StandardTimeSimilarStructure() {
                     label="Process"
                     variant="outlined"
                     size="medium"
-                    style={{ width: 270, background: '#fff', borderRadius: 8 }}
+                    style={{ width: 270, background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px 0 rgba(25,118,210,0.07)', border: '1.5px solid #e3eaf7' }}
                   />
                 )}
                 style={{ width: "100%" }}
@@ -931,11 +967,15 @@ export default function StandardTimeSimilarStructure() {
               style={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "center",
-                gap: 24,
+                justifyContent: "flex-start", // เปลี่ยนจาก center เป็น flex-start เพื่อชิดซ้าย
+                gap: 18,
                 width: "100%",
-                marginLeft: 0,
+                marginLeft: 90,
                 zIndex: 1,
+                background: 'rgba(255,255,255,0.92)',
+                borderRadius: 12,
+                boxShadow: '0 2px 8px 0 rgba(25,118,210,0.06)',
+                padding: 8,
               }}
             >
               <Button
@@ -1103,14 +1143,15 @@ export default function StandardTimeSimilarStructure() {
               overflowX: "auto",
               maxHeight: 520,
               overflowY: "auto",
-              background: "rgba(255,255,255,0.98)",
+              background: "#fff",
               borderRadius: 18,
-              boxShadow: "0 4px 18px 0 rgba(0,87,183,0.09)",
-              zIndex: 1,
+              boxShadow: "0 8px 15px 0 rgba(0, 0, 0, 0.64), 0 2px 12px 0 rgba(0,0,0,0.10)",
+              zIndex: 2,
               position: 'relative',
-              border: '1px solid rgb(0, 0, 0)',
+              border: '1.5px solid #e3eaf7',
               boxSizing: 'border-box',
               margin: 0,
+              transition: 'box-shadow 0.22s',
             }}
           >
             <table className="custom-table beautiful-table">
@@ -1157,34 +1198,33 @@ export default function StandardTimeSimilarStructure() {
               border-spacing: 0;
               width: 100%;
               min-width: 1200px;
-              /* border: 2px solid #1976d2;  // ย้าย border ไปที่ div container */
-              box-shadow: 0 4px 18px 0 rgba(0,87,183,0.09);
-              background: #fff;
+              background: transparent;
               margin: 0 auto;
-              border-radius: 16px;
+              border-radius: 12px;
               overflow: visible;
               font-family: 'Segoe UI', 'Poppins', sans-serif;
+              box-shadow: none;
             }
             .beautiful-table th, .beautiful-table td {
-              border: 1.5px solid rgba(4, 4, 4, 0.47);
-              padding: 12px 10px;
+              border: 1.2px solid #e3eaf7;
+              padding: 13px 12px;
               text-align: center;
-              font-size: 15px;
+              font-size: 15.5px;
               white-space: nowrap;
               background-clip: padding-box;
-              transition: background 0.18s;
+              transition: background 0.18s, box-shadow 0.18s;
             }
             .beautiful-table th {
-              background: linear-gradient(90deg,rgb(11, 91, 171) 60%,rgb(11, 63, 159) 100%);
+              background: #1976d2;
               color: #fff;
               font-weight: 700;
-              font-size: 17px;
+              font-size: 16.5px;
               letter-spacing: 0.7px;
               position: sticky;
               top: 0;
               z-index: 20;
               border-top: none;
-              box-shadow: 0 2px 8px 0 rgba(0,87,183,0.07);
+              box-shadow: 0 4px 18px 0 rgba(0,0,0,0.22), 0 1.5px 8px 0 rgba(0,0,0,0.13);
               background-clip: padding-box;
             }
             .beautiful-table thead {
@@ -1194,27 +1234,32 @@ export default function StandardTimeSimilarStructure() {
             }
             .beautiful-table tr {
               height: 44px;
-              transition: background 0.18s;
+              transition: background 0.18s, box-shadow 0.18s;
             }
             .beautiful-table tbody tr:nth-child(even) {
-              background: #f6fafd;
+              background: #f7fafd;
             }
             .beautiful-table tbody tr:hover {
               background: #e3f0ff;
+              box-shadow: 0 4px 18px 0 rgba(0,0,0,0.13), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+              z-index: 2;
+              position: relative;
             }
             .beautiful-table td {
-              border-bottom: 1.5px solid #e0e7ef;
-              font-size: 15px;
+              border-bottom: 1.2px solid #e3eaf7;
+              font-size: 15.5px;
+              color: #1a2a3a;
+              background: transparent;
+              box-shadow: none;
             }
-            /* Remove border-bottom: none for last row to always show bottom border */
             .action-btn {
               transition: box-shadow 0.18s, transform 0.18s, background 0.18s, border-color 0.18s;
               border-radius: 12px !important;
             }
             .action-btn:hover {
-              box-shadow: 0 4px 16px rgba(0,87,183,0.13);
+              box-shadow: 0 4px 16px rgba(25,118,210,0.10);
               transform: translateY(-2px) scale(1.10);
-              background:rgb(99, 177, 250) !important;
+              background: #e3f0ff !important;
               border-color: #1976d2 !important;
             }
             @media (max-width: 1300px) {
