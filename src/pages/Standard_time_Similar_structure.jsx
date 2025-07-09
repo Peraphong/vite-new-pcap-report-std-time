@@ -778,31 +778,19 @@ export default function StandardTimeSimilarStructure() {
           }}
         >
           {/* Minimal floating shapes for soft depth */}
-          {/* Decorative floating shapes for extra depth */}
+          {/* Decorative floating shapes for extra depth (ปรับให้ดู modern, luxury, ไม่รก) */}
           <div style={{
             position: 'absolute',
             top: -60,
             right: 60,
             width: 120,
             height: 120,
-            background: 'radial-gradient(circle at 100% 100%,rgba(55, 147, 245, 0.66) 0%, #e3f0ff 80%)',
+            background: 'radial-gradient(circle at 100% 100%,rgba(55, 147, 245, 0.22) 0%, #e3f0ff 80%)',
             borderRadius: '50%',
             zIndex: 0,
-            filter: 'blur(18px)',
-            opacity: 0.45,
-          }} />
-          {/* <div style={{
-            position: 'absolute',
-            bottom: -50,
-            left: 80,
-            width: 100,
-            height: 100,
-            background: 'radial-gradient(circle at 40% 60%, #0baae5 0%, #e3f0ff 90%)',
-            borderRadius: '50%',
-            zIndex: 0,
-            filter: 'blur(18px)',
+            filter: 'blur(24px)',
             opacity: 0.32,
-          }} /> */}
+          }} />
           <div style={{
             position: 'absolute',
             top: 120,
@@ -812,8 +800,8 @@ export default function StandardTimeSimilarStructure() {
             background: 'radial-gradient(circle at 60% 40%, #e3f0ff 0%, #b3d8ff 80%)',
             borderRadius: '50%',
             zIndex: 0,
-            filter: 'blur(24px)',
-            opacity: 0.22,
+            filter: 'blur(32px)',
+            opacity: 0.13,
           }} />
           <div style={{
             position: 'absolute',
@@ -824,8 +812,8 @@ export default function StandardTimeSimilarStructure() {
             background: 'radial-gradient(circle at 40% 60%, #e3f0ff 0%, #0baae5 90%)',
             borderRadius: '50%',
             zIndex: 0,
-            filter: 'blur(24px)',
-            opacity: 0.18,
+            filter: 'blur(32px)',
+            opacity: 0.10,
           }} />
           {/* Title Section */}
           <div style={{
@@ -836,23 +824,34 @@ export default function StandardTimeSimilarStructure() {
             zIndex: 1,
           }}>
             <h1 style={{
-              fontSize: 34,
-              fontWeight: 700,
-              letterSpacing: 1.1,
-              color: '#1976d2',
+              fontSize: 38,
+              fontWeight: 900,
+              letterSpacing: 1.5,
+              color: 'transparent',
+              background: 'linear-gradient(90deg, #1976d2 30%, #0baae5 100%)',
+              WebkitBackgroundClip: 'text',
+              backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
               marginBottom: 0,
               marginTop: 0,
-              fontFamily: 'Segoe UI, Poppins, sans-serif',
+              fontFamily: 'Poppins, Segoe UI, sans-serif',
+              textShadow: '0 2px 12px rgba(25,118,210,0.08)',
+              lineHeight: 1.18,
+              transition: 'all 0.18s',
             }}>
               Standard Time Similar Structure
             </h1>
             <div style={{
-              fontSize: 18,
-              color: '#4a6fa1',
-              fontWeight: 400,
+              fontSize: 15,
+              color: 'rgb(18, 18, 18)',
+              fontWeight: 500,
               marginBottom: 0,
-              marginTop: 0,
-              fontFamily: 'Segoe UI, Poppins, sans-serif',
+              marginTop: 6,
+              fontFamily: 'Poppins, Segoe UI, sans-serif',
+              letterSpacing: 0.2,
+              textShadow: '0 1px 8px rgba(0, 0, 0, 0.07)',
+              lineHeight: 1.22,
+              transition: 'all 0.18s',
             }}>
               Effortlessly compare and analyze standard times by product and process
             </div>
@@ -869,16 +868,16 @@ export default function StandardTimeSimilarStructure() {
               width: "100%",
               maxWidth: 2200,
               margin: "0 auto",
-              background: "linear-gradient(120deg,rgb(216, 232, 249) 60%,rgba(244, 251, 255, 0.5) 100%)",
-              borderRadius: 22,
-              boxShadow: "0 8px 32px 0 rgba(25,118,210,0.10)",
-              border: "1.5px solid #e3eaf7",
-              padding: '28px 32px',
+              background: "linear-gradient(90deg, #e3f0ff 0%, #fafdff 100%)",
+              borderRadius: 18,
+              boxShadow: "0 4px 18px 0 rgba(25,118,210,0.10)",
+              // border: "1.5px solid #b3d8ff",
+              padding: '24px 28px',
               zIndex: 2,
               position: 'relative',
               top: 0,
               left: 0,
-              transition: 'box-shadow 0.2s',
+              transition: 'box-shadow 0.2s, background 0.2s',
             }}
           >
             {/* Product Autocomplete */}
@@ -1224,8 +1223,9 @@ export default function StandardTimeSimilarStructure() {
               top: 0;
               z-index: 20;
               border-top: none;
-              box-shadow: 0 4px 18px 0 rgba(0,0,0,0.22), 0 1.5px 8px 0 rgba(0,0,0,0.13);
+              box-shadow: 0 2px 8px 0 rgba(0,0,0,0.10);
               background-clip: padding-box;
+              text-shadow: none;
             }
             .beautiful-table thead {
               position: sticky;
@@ -1241,7 +1241,7 @@ export default function StandardTimeSimilarStructure() {
             }
             .beautiful-table tbody tr:hover {
               background: #e3f0ff;
-              box-shadow: 0 4px 18px 0 rgba(0,0,0,0.13), 0 1.5px 8px 0 rgba(0,0,0,0.10);
+              box-shadow: 0 2px 8px 0 rgba(0,0,0,0.08);
               z-index: 2;
               position: relative;
             }
@@ -1253,14 +1253,101 @@ export default function StandardTimeSimilarStructure() {
               box-shadow: none;
             }
             .action-btn {
-              transition: box-shadow 0.18s, transform 0.18s, background 0.18s, border-color 0.18s;
-              border-radius: 12px !important;
+              border-radius: 16px !important;
+              box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+              border: 1.5px solid #e3eaf7 !important;
+              background: linear-gradient(120deg, #fafdff 60%, #e3f0ff 100%) !important;
+              transition: box-shadow 0.22s, transform 0.18s, background 0.22s, border-color 0.18s;
+              position: relative;
+              overflow: hidden;
+            }
+            .action-btn:active {
+              transform: scale(0.98);
+              filter: brightness(0.98);
+              box-shadow: 0 2px 8px 0 rgba(25,118,210,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
             }
             .action-btn:hover {
-              box-shadow: 0 4px 16px rgba(25,118,210,0.10);
-              transform: translateY(-2px) scale(1.10);
-              background: #e3f0ff !important;
+              box-shadow: 0 6px 20px 0 rgba(25,118,210,0.16), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
+              transform: translateY(-2px) scale(1.08);
+              filter: brightness(1.06);
               border-color: #1976d2 !important;
+              background: linear-gradient(120deg, #e3f0ff 60%, #fafdff 100%) !important;
+            }
+            /* ปุ่ม primary (ฟ้า) gradient เพิ่มความหรูหรา */
+            .MuiButton-containedPrimary.action-btn {
+              background: linear-gradient(120deg, #1976d2 60%, #0baae5 100%) !important;
+              color: #fff !important;
+              border: 1.5px solid #1976d2 !important;
+              box-shadow: 0 4px 16px 0 rgba(25,118,210,0.13), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+            }
+            .MuiButton-containedPrimary.action-btn:hover {
+              background: linear-gradient(120deg, #0baae5 60%, #1976d2 100%) !important;
+              box-shadow: 0 8px 24px 0 rgba(25,118,210,0.18), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
+              border-color: #0baae5 !important;
+            }
+            /* ปุ่ม outlined (แดง, เขียว, เทา) เพิ่มขอบและเงา */
+            .MuiButton-outlined.action-btn {
+              background: linear-gradient(120deg, #fafdff 60%, #e3f0ff 100%) !important;
+              color: inherit;
+              border-width: 1.5px !important;
+              box-shadow: 0 2px 8px 0 rgba(25,118,210,0.08), 0 1.5px 4px 0 rgba(0,0,0,0.06);
+            }
+            .MuiButton-outlined.action-btn:hover {
+              background: linear-gradient(120deg, #e3f0ff 60%, #fafdff 100%) !important;
+              box-shadow: 0 8px 24px 0 rgba(25,118,210,0.13), 0 2px 8px 0 rgba(0,0,0,0.09);
+              border-color: #1976d2 !important;
+            }
+            /* ปุ่ม outlined สี error (แดง) */
+            .MuiButton-outlinedError.action-btn {
+              background: linear-gradient(120deg, #fff 60%, #ffeaea 100%) !important;
+              color: #e53935 !important;
+              border: 1.5px solid #e53935 !important;
+              box-shadow: 0 4px 16px 0 rgba(229,57,53,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+            }
+            .MuiButton-outlinedError.action-btn:hover {
+              background: linear-gradient(120deg, #ffeaea 60%, #fff 100%) !important;
+              border-color: #e53935 !important;
+              color: #b71c1c !important;
+              box-shadow: 0 8px 24px 0 rgba(229,57,53,0.18), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
+            }
+            /* ปุ่ม outlined สี success (เขียว) */
+            .MuiButton-outlinedSuccess.action-btn {
+              background: linear-gradient(120deg, #f6fff7 60%, #e0ffe3 100%) !important;
+              color: #2e7d32 !important;
+              border: 1.5px solid #2e7d32 !important;
+              box-shadow: 0 4px 16px 0 rgba(46,125,50,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+            }
+            .MuiButton-outlinedSuccess.action-btn:hover {
+              background: linear-gradient(120deg, #e0ffe3 60%, #f6fff7 100%) !important;
+              border-color: #2e7d32 !important;
+              color: #1b5e20 !important;
+              box-shadow: 0 8px 24px 0 rgba(46,125,50,0.18), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
+            }
+            /* ปุ่ม outlined สี info (ฟ้าอ่อน) */
+            .MuiButton-outlinedInfo.action-btn {
+              background: linear-gradient(120deg, #fafdff 60%, #e3f0ff 100%) !important;
+              color: #0baae5 !important;
+              border: 1.5px solid #0baae5 !important;
+              box-shadow: 0 4px 16px 0 rgba(11,170,229,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+            }
+            .MuiButton-outlinedInfo.action-btn:hover {
+              background: linear-gradient(120deg, #e3f0ff 60%, #fafdff 100%) !important;
+              border-color: #0baae5 !important;
+              color: #1976d2 !important;
+              box-shadow: 0 8px 24px 0 rgba(11,170,229,0.18), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
+            }
+            /* ปุ่ม outlined สี secondary (ม่วงเทา) */
+            .MuiButton-outlinedSecondary.action-btn {
+              background: linear-gradient(120deg, #f7f3ff 60%, #e3eaff 100%) !important;
+              color: #7c4dff !important;
+              border: 1.5px solid #7c4dff !important;
+              box-shadow: 0 4px 16px 0 rgba(124,77,255,0.10), 0 1.5px 4px 0 rgba(0,0,0,0.04) inset;
+            }
+            .MuiButton-outlinedSecondary.action-btn:hover {
+              background: linear-gradient(120deg, #e3eaff 60%, #f7f3ff 100%) !important;
+              border-color: #7c4dff !important;
+              color: #512da8 !important;
+              box-shadow: 0 8px 24px 0 rgba(124,77,255,0.18), 0 2px 8px 0 rgba(0,0,0,0.08) inset;
             }
             @media (max-width: 1300px) {
               .beautiful-table {
