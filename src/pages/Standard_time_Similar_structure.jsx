@@ -104,6 +104,13 @@ export default function StandardTimeSimilarStructure() {
   const progressTimer = useRef(null);
 
   // -------------------- Effect --------------------
+  // Sync progress bar to real download progress instantly for real-time feel
+  useEffect(() => {
+    if (exporting) {
+      setProgressPercent(exportProgress.percent);
+    }
+  }, [exporting, exportProgress.percent]);
+
   useEffect(() => {
     let cancel;
     setProductLoading(true);
@@ -155,7 +162,8 @@ export default function StandardTimeSimilarStructure() {
   // Progress bar: animate smoothly but always catch up to real percent, and only reach 100% when done
   useEffect(() => {
     if (exporting) {
-      setProgressPercent(0);
+      // Only reset to 0% if this is a new export (loaded = 0)
+      if (exportProgress.loaded === 0) setProgressPercent(0);
       if (progressTimer.current) clearInterval(progressTimer.current);
       progressTimer.current = setInterval(() => {
         setProgressPercent(prev => {
@@ -179,6 +187,9 @@ export default function StandardTimeSimilarStructure() {
 
   // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
   const handleSendTableData = async () => {
+    // Check if user selected all product and all process
+    const isAllProduct = !selectedProduct || selectedProduct === 'All Product' || selectedProduct.prd_name === 'All Product';
+    const isAllProcess = !selectedProcess || selectedProcess === 'All Process' || selectedProcess.proc_disp === 'All Process';
     // Check if tableData is empty or total is 0
     if (!total || total === 0) {
       await Swal.fire({
@@ -189,15 +200,19 @@ export default function StandardTimeSimilarStructure() {
       });
       return;
     }
+    let swalText = `Do you want to update all data (${total.toLocaleString()} records) to the system?`;
+    if (isAllProduct && isAllProcess) {
+      swalText += '\n\nWarning: You are about to update all products and all processes. This may cause the browser to freeze due to the large amount of data. Please wait until the upload is complete and do not refresh the page.';
+    }
     const result = await Swal.fire({
       title: 'Confirm Update?',
-      text: `Do you want to update all data (${total.toLocaleString()} records) to the system?`,
+      text: swalText,
       icon: 'question',
       showCancelButton: true,
       confirmButtonText: 'Yes',
-      cancelButtonText: 'No',
+      cancelButtonText: 'Cancel',
       confirmButtonColor: '#1976d2',
-      cancelButtonColor: '#e53935',
+      cancelButtonColor: '#e539ช35',
       reverseButtons: true
     });
     if (result.isConfirmed) {
@@ -748,7 +763,7 @@ export default function StandardTimeSimilarStructure() {
               </circle>
             </svg>
             <div style={{ fontSize: 22, color: '#1976d2', fontWeight: 700 }}>Loading... <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(loadingPercent))}%</span></div>
-            <div style={{ fontSize: 16, color: '#1976d2', fontWeight: 400 }}>กำลังดึงข้อมูลทั้งหมด กรุณารอสักครู่</div>
+            <div style={{ fontSize: 16, color: '#1976d2', fontWeight: 400 }}>Loading all data, please wait...</div>
             <div style={{ fontSize: 15, color: '#1976d2', fontWeight: 400 }}>
               Loaded <span style={{ color: '#1976d2', fontWeight: 700 }}>{loadingLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{total.toLocaleString()}</span> records
             </div>
@@ -1475,7 +1490,7 @@ export default function StandardTimeSimilarStructure() {
                 Progress: <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(progressPercent))}%</span>
               </div>
               <div style={{ fontSize: 17, color: '#1976d2', marginBottom: 8, fontWeight: 500 }}>
-                Loaded <span style={{ color: '#1976d2', fontWeight: 700 }}>{progressLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{exportProgress.total.toLocaleString()}</span> rows
+                Loading by page: <span style={{ color: '#1976d2', fontWeight: 700 }}>{progressLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{exportProgress.total.toLocaleString()}</span> rows
               </div>
               {/* --- Add page/chunk info --- */}
               {exportProgress.total > 0 && (

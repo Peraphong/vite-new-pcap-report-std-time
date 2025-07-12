@@ -128,7 +128,8 @@ export default function Navbar({ onToggle }) {
 
   //*Menu name ******************************************************
   const [selectedMenu, setSelectedMenu] = React.useState("");
-  const [menuName, setMenuName] = React.useState("Smart Waste Management");
+  const [menuName, setMenuName] = React.useState("SMART WASTE MANAGEMENT");
+  
   const [menuIcon, setMenuIcon] = React.useState(
     <img src="" alt="" width={30} />
     // <img src="/dashboard1.png" alt="" width={30} />
@@ -137,13 +138,13 @@ export default function Navbar({ onToggle }) {
   React.useEffect(() => {
     switch (location.pathname) {
       case "/standard_time_similar_structure":
-        setMenuName("Standard Time Similar Structure");
-        setMenuIcon(<img src="/purchase-order.png" alt="" width={30} />);
+        setMenuName("STANDARD TIME SIMILAR STRUCTURE");
+        setMenuIcon(<img src="/StandardTimeSimilarStructure.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }}/>);
         setSelectedMenu("stdtime");
         break;
       case "/Standard_Time_Report_By_Product":
-        setMenuName("Standard Time Report By Product.");
-        setMenuIcon(<img src="/map.png" alt="" width={30} />);
+        setMenuName("STANDARD TIME REPORT BY PRODUCT");
+        setMenuIcon(<img src="/StandardTimeReportByProduct.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }} />);
         setSelectedMenu("stdtimeReport");
         break;
       case "/standard_time_various_types_of_graphs":
@@ -151,49 +152,11 @@ export default function Navbar({ onToggle }) {
         setMenuIcon(<img src="/analysis.png" alt="" width={30} />);
         setSelectedMenu("stdtimeGraphs");
         break;
-      case "/smartsus_sus_delivery_order":
-        setMenuName("SUS Delivery Order Management");
-        setMenuIcon(<img src="/sus-delivery.png" alt="" width={30} />);
-        setSelectedMenu("pln");
+      case "/home":
+        setMenuName("SMART STANDARD TIME MANAGEMENT");
+        setMenuIcon(<img src="/home.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }} />);
+        setSelectedMenu("stdtimeGraphs");
         break;
-      case "/smartsus_sus_delivery_order_new":
-        setMenuName("SUS Delivery Order Management (NEW VERSION)");
-        setMenuIcon(<img src="/sus-delivery.png" alt="" width={30} />);
-        setSelectedMenu("pln_new");
-        break;
-      case "/smartsus_upload_stock_sus_final":
-        setMenuName("Stock SUS plate (Final)");
-        setMenuIcon(<img src="/stock-fin.png" alt="" width={30} />);
-        setSelectedMenu("fin");
-        break;
-      case "/smartsus_summary_sus_purchaser_new":
-        setMenuName("Summary SUS Plate by Item Material (Purchaser)");
-        setMenuIcon(<img src="/purchase-order.png" alt="" width={30} />);
-        setSelectedMenu("pur");
-        break;
-      case "/smartSus_upload_sus_vendor_confirm":
-        setMenuName("Data plan from vendor confirm");
-        setMenuIcon(<img src="/supplier.png" alt="" width={30} />);
-        setSelectedMenu("ven");
-        break;
-      case "/smartSus_details_wip":
-        setMenuName("Product WIP");
-        setMenuIcon(<img src="/wip.png" alt="" width={30} />);
-        setSelectedMenu("wip");
-        break;
-      case "/smartSus_monitoring_update_table":
-        setMenuName("Monitoring update data on Table");
-        setMenuIcon(<img src="/update.png" alt="" width={30} />);
-        setSelectedMenu("mon");
-        break;
-      case "/smartsus_master_use_mat_fin":
-        setMenuName("Master data mapping use MAT [FIN]");
-        setMenuIcon(<img src="/fin.png" alt="" width={30} />);
-        setSelectedMenu("mFin");
-        break;
-      default:
-        setMenuName("NEW PCAP SYSTEM REPORT");
-        setMenuIcon(<img src="/analysis.png" alt="" width={30} />);
     }
   }, [location.pathname]);
 
@@ -364,11 +327,11 @@ export default function Navbar({ onToggle }) {
                 <ListItemIcon
                   sx={{
                     minWidth: 0,
-                    mr: open ? 2 : "auto",
+                    mr: open ? 1.3 : "auto",
                     justifyContent: "center",
                   }}
                 >
-                  <img src="/purchase-order.png" alt="" width={30} />
+                  <img src="/StandardTimeSimilarStructure.png" alt="" width={30} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Standard Time Table"
@@ -420,7 +383,7 @@ export default function Navbar({ onToggle }) {
                     justifyContent: "center",
                   }}
                 >
-                  <img src="/map.png" alt="" width={30} />
+                  <img src="/StandardTimeReportByProduct.png" alt="" width={30} />
                 </ListItemIcon>
                 <ListItemText
                   primary="Standard Time Table"

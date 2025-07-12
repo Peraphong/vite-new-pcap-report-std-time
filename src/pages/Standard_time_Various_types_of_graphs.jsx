@@ -1,7 +1,7 @@
 
-import Navbar from "../components/navbar/Navbar";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import { useEffect, useState } from "react";
+import Navbar from "../components/navbar/Navbar";
 import { Bar, Line, Pie, Doughnut } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -15,6 +15,10 @@ import {
   LineElement,
   ArcElement,
 } from "chart.js";
+import { FaChartBar, FaChartLine, FaChartPie, FaDotCircle } from "react-icons/fa";
+import { MdFactory } from "react-icons/md";
+import { BsFillPeopleFill } from "react-icons/bs";
+import { HiOutlineDocumentReport } from "react-icons/hi";
 
 ChartJS.register(
   CategoryScale,
@@ -29,15 +33,19 @@ ChartJS.register(
 );
 
 export default function StandardTimeVariousTypesOfGraphs() {
-  // สุ่มข้อมูลตัวอย่าง
-  // ใช้ null เป็นค่าเริ่มต้นเพื่อหลีกเลี่ยงการ render กราฟก่อนข้อมูลพร้อม
-  const [barData, setBarData] = useState(null);
-  const [lineData, setLineData] = useState(null);
-  const [pieData, setPieData] = useState(null);
-  const [doughnutData, setDoughnutData] = useState(null);
-  
+  // Mock data for summary cards
+  const [summary, setSummary] = useState({
+    projects: 12,
+    processes: 8,
+    avgTime: 54,
+    factories: 3,
+  });
 
-
+  // Chart data states
+  const [barData, setBarData] = useState();
+  const [lineData, setLineData] = useState();
+  const [pieData, setPieData] = useState();
+  const [doughnutData, setDoughnutData] = useState();
 
   useEffect(() => {
     const labels = ["A", "B", "C", "D", "E", "F"];
@@ -50,6 +58,8 @@ export default function StandardTimeVariousTypesOfGraphs() {
           label: "Bar Example",
           data: randomArr(),
           backgroundColor: "#1976d2",
+          borderRadius: 6,
+          borderSkipped: false,
         },
       ],
     });
@@ -60,8 +70,11 @@ export default function StandardTimeVariousTypesOfGraphs() {
           label: "Line Example",
           data: randomArr(),
           borderColor: "#43a047",
-          backgroundColor: "rgba(246, 252, 247, 0.2)",
-          tension: 0.4,
+          backgroundColor: "rgba(67,160,71,0.08)",
+          tension: 0.45,
+          pointBackgroundColor: "#43a047",
+          pointBorderColor: "#fff",
+          pointRadius: 5,
         },
       ],
     });
@@ -79,6 +92,8 @@ export default function StandardTimeVariousTypesOfGraphs() {
             "#7b1fa2",
             "#0288d1",
           ],
+          borderColor: "#fff",
+          borderWidth: 2,
         },
       ],
     });
@@ -96,6 +111,8 @@ export default function StandardTimeVariousTypesOfGraphs() {
             "#7b1fa2",
             "#0288d1",
           ],
+          borderColor: "#fff",
+          borderWidth: 2,
         },
       ],
     });
@@ -103,14 +120,14 @@ export default function StandardTimeVariousTypesOfGraphs() {
 
   return (
     <>
-      <Navbar onToggle={() => {}} />
+      <Navbar />
       <Box
         sx={{
           marginLeft: { xs: 0, md: '220px' },
           marginTop: 0,
           padding: { xs: 0, md: 0 },
           minHeight: '100vh',
-          background: 'radial-gradient(circle at 60% 10%, #e3f0ff 0%, #f9f9f9 100%)',
+          background: 'linear-gradient(120deg, #e3f0ff 0%, #f9f9f9 100%)',
           position: 'relative',
         }}
       >
@@ -127,9 +144,9 @@ export default function StandardTimeVariousTypesOfGraphs() {
         }} />
         <Box
           sx={{
-            background: 'rgba(255,255,255,0.85)',
-            borderRadius: 8,
-            boxShadow: '0 12px 48px 0 rgba(31, 38, 135, 0.18)',
+            background: 'rgba(255,255,255,0.92)',
+            borderRadius: 16,
+            boxShadow: '0 12px 48px 0 rgba(31, 38, 135, 0.13)',
             padding: { xs: 2, md: 8 },
             width: '100vw',
             maxWidth: '100vw',
@@ -140,13 +157,12 @@ export default function StandardTimeVariousTypesOfGraphs() {
             zIndex: 1,
           }}
         >
-          
           {/* Header Section */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            marginBottom: 40,
+            marginBottom: 32,
             marginTop: 32,
             position: 'relative',
           }}>
@@ -156,14 +172,13 @@ export default function StandardTimeVariousTypesOfGraphs() {
               color: '#1976d2',
               letterSpacing: 2,
               marginBottom: 10,
-              textShadow: '0 4px 24pxrgb(0, 0, 0), 0 2px 8px #e3f0ff',
               fontFamily: 'Sarabun, Segoe UI, sans-serif',
-              background: 'linear-gradient(90deg,rgb(50, 47, 226) 0%,rgb(135, 165, 248) 100%)',
+              background: 'linear-gradient(90deg,rgb(0, 0, 0) 0%,rgb(123, 157, 249) 100%)',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               backgroundClip: 'text',
             }}>
-              Standard Time Report
+              <HiOutlineDocumentReport style={{ fontSize: 54, marginRight: 12, verticalAlign: 'middle' }} /> Standard Time Report
             </h1>
             <span style={{
               color: '#555',
@@ -171,7 +186,6 @@ export default function StandardTimeVariousTypesOfGraphs() {
               fontWeight: 500,
               marginBottom: 10,
               letterSpacing: 1,
-              textShadow: '0 2px 8px #e3f0ff',
               fontFamily: 'Sarabun, Segoe UI, sans-serif',
             }}>
               รวมกราฟแสดงผลข้อมูล Standard Time หลายรูปแบบ
@@ -187,6 +201,44 @@ export default function StandardTimeVariousTypesOfGraphs() {
               pointerEvents: 'none',
               userSelect: 'none',
             }}>PCAP</div>
+          </div>
+          {/* Summary Cards Section */}
+          <div style={{
+            display: 'flex',
+            gap: 32,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginBottom: 36,
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ background: 'linear-gradient(90deg,#e3f0ff 0%,#b3e5fc 100%)', borderRadius: 18, boxShadow: '0 4px 16px #e3f0ff', padding: '24px 38px', minWidth: 220, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <HiOutlineDocumentReport style={{ fontSize: 38, color: '#1976d2' }} />
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#1976d2', marginBottom: 2 }}>{summary.projects}</div>
+                <div style={{ fontSize: 18, color: '#555', fontWeight: 500 }}>Projects</div>
+              </div>
+            </div>
+            <div style={{ background: 'linear-gradient(90deg,#f9f9f9 0%,#e3f0ff 100%)', borderRadius: 18, boxShadow: '0 4px 16px #e3f0ff', padding: '24px 38px', minWidth: 220, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <BsFillPeopleFill style={{ fontSize: 38, color: '#43a047' }} />
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#43a047', marginBottom: 2 }}>{summary.processes}</div>
+                <div style={{ fontSize: 18, color: '#555', fontWeight: 500 }}>Processes</div>
+              </div>
+            </div>
+            <div style={{ background: 'linear-gradient(90deg,#e3f0ff 0%,#f9f9f9 100%)', borderRadius: 18, boxShadow: '0 4px 16px #e3f0ff', padding: '24px 38px', minWidth: 220, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <FaChartLine style={{ fontSize: 38, color: '#ffa000' }} />
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#ffa000', marginBottom: 2 }}>{summary.avgTime} min</div>
+                <div style={{ fontSize: 18, color: '#555', fontWeight: 500 }}>Avg. Standard Time</div>
+              </div>
+            </div>
+            <div style={{ background: 'linear-gradient(90deg,#e3f0ff 0%,#b3e5fc 100%)', borderRadius: 18, boxShadow: '0 4px 16px #e3f0ff', padding: '24px 38px', minWidth: 220, display: 'flex', alignItems: 'center', gap: 18 }}>
+              <MdFactory style={{ fontSize: 38, color: '#7b1fa2' }} />
+              <div>
+                <div style={{ fontSize: 32, fontWeight: 800, color: '#7b1fa2', marginBottom: 2 }}>{summary.factories}</div>
+                <div style={{ fontSize: 18, color: '#555', fontWeight: 500 }}>Factories</div>
+              </div>
+            </div>
           </div>
           {/* Search Section */}
           <div style={{
@@ -209,13 +261,13 @@ export default function StandardTimeVariousTypesOfGraphs() {
               <div style={{ position: 'relative' }}>
                 <input type="text" placeholder="Product Name" style={{ padding: '16px 20px 16px 48px', borderRadius: 14, border: '2px solid #b3e5fc', minWidth: 240, background: '#fff', color: '#222', fontSize: 18, boxShadow: '0 2px 12px #e3f0ff', fontWeight: 500, outline: 'none', transition: 'border 0.2s' }} />
                 <span style={{ position: 'absolute', left: 16, top: 18, color: '#1976d2' }}>
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="#1976d2" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"></path></svg>
+                  <FaChartBar style={{ fontSize: 22 }} />
                 </span>
               </div>
               <div style={{ position: 'relative' }}>
                 <input type="text" placeholder="Process" style={{ padding: '16px 20px 16px 48px', borderRadius: 14, border: '2px solid #b3e5fc', minWidth: 240, background: '#fff', color: '#222', fontSize: 18, boxShadow: '0 2px 12px #e3f0ff', fontWeight: 500, outline: 'none', transition: 'border 0.2s' }} />
                 <span style={{ position: 'absolute', left: 16, top: 18, color: '#43a047' }}>
-                  <svg width="22" height="22" fill="none" viewBox="0 0 24 24"><path fill="#43a047" d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 18a8 8 0 1 1 0-16 8 8 0 0 1 0 16z"></path></svg>
+                  <FaChartLine style={{ fontSize: 22 }} />
                 </span>
               </div>
               <select style={{ padding: '16px 20px', borderRadius: 14, border: '2px solid #b3e5fc', minWidth: 180, background: '#fff', color: '#1976d2', fontSize: 18, fontWeight: 700, boxShadow: '0 2px 12px #e3f0ff', outline: 'none', transition: 'border 0.2s' }}>
@@ -231,8 +283,9 @@ export default function StandardTimeVariousTypesOfGraphs() {
               </button>
             </div>
           </div>
+          {/* Divider */}
+          <div style={{ width: '100%', height: 2, background: 'linear-gradient(90deg,#e3f0ff 0%,#b3e5fc 100%)', margin: '32px 0 36px 0', borderRadius: 2, opacity: 0.7 }} />
           {/* Graphs Section */}
-          
           <div
             style={{
               display: 'grid',
@@ -247,35 +300,34 @@ export default function StandardTimeVariousTypesOfGraphs() {
               marginBottom: 32,
             }}
           >
-
             {/* Bar Graph */}
             <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(25,118,210,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(25,118,210,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #1976d2', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 style={{ color: '#1976d2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1, textShadow: '0 2px 8px #e3f0ff' }}>Bar Chart</h3>
+              <FaChartBar style={{ color: '#1976d2', fontSize: 32, marginBottom: 8 }} />
+              <h3 style={{ color: '#1976d2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Bar Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบแท่ง</span>
-              {barData && <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' } } }} />}
+              {barData && <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#1976d2', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
             </div>
-
             {/* Line Graph */}
             <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(67,160,71,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(67,160,71,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #43a047', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 style={{ color: '#43a047', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1, textShadow: '0 2px 8px #e3f0ff' }}>Line Chart</h3>
+              <FaChartLine style={{ color: '#43a047', fontSize: 32, marginBottom: 8 }} />
+              <h3 style={{ color: '#43a047', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Line Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบเส้น</span>
-              {lineData && <Line data={lineData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' } } }} />}
+              {lineData && <Line data={lineData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#43a047', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
             </div>
-
             {/* Pie Graph */}
             <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(255,160,0,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(255,160,0,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #ffa000', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 style={{ color: '#ffa000', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1, textShadow: '0 2px 8px #e3f0ff' }}>Pie Chart</h3>
+              <FaChartPie style={{ color: '#ffa000', fontSize: 32, marginBottom: 8 }} />
+              <h3 style={{ color: '#ffa000', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Pie Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบวงกลม</span>
-              {pieData && <Pie data={pieData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' } } }} />}
+              {pieData && <Pie data={pieData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#ffa000', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
             </div>
-
             {/* Doughnut Graph */}
             <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(123,31,162,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(123,31,162,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #7b1fa2', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-              <h3 style={{ color: '#7b1fa2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1, textShadow: '0 2px 8px #e3f0ff' }}>Doughnut Chart</h3>
+              <FaDotCircle style={{ color: '#7b1fa2', fontSize: 32, marginBottom: 8 }} />
+              <h3 style={{ color: '#7b1fa2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Doughnut Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบโดนัท</span>
-              {doughnutData && <Doughnut data={doughnutData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' } } }} />}
+              {doughnutData && <Doughnut data={doughnutData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#7b1fa2', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
             </div>
-
           </div>
         </Box>
       </Box>
