@@ -129,7 +129,7 @@ export default function Navbar({ onToggle }) {
   //*Menu name ******************************************************
   const [selectedMenu, setSelectedMenu] = React.useState("");
   const [menuName, setMenuName] = React.useState("SMART WASTE MANAGEMENT");
-  
+
   const [menuIcon, setMenuIcon] = React.useState(
     <img src="" alt="" width={30} />
     // <img src="/dashboard1.png" alt="" width={30} />
@@ -139,22 +139,73 @@ export default function Navbar({ onToggle }) {
     switch (location.pathname) {
       case "/standard_time_similar_structure":
         setMenuName("STANDARD TIME SIMILAR STRUCTURE");
-        setMenuIcon(<img src="/StandardTimeSimilarStructure.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }}/>);
+        setMenuIcon(
+          <img
+            src="/StandardTimeSimilarStructure.png"
+            alt=""
+            width={30}
+            style={{
+              backgroundColor: "rgb(252, 252, 252)",
+              border: "1.5px solid  #fff",
+              borderRadius: "80%",
+              padding: "0px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
+        );
         setSelectedMenu("stdtime");
         break;
       case "/Standard_Time_Report_By_Product":
         setMenuName("STANDARD TIME REPORT BY PRODUCT");
-        setMenuIcon(<img src="/StandardTimeReportByProduct.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }} />);
+        setMenuIcon(
+          <img
+            src="/StandardTimeReportByProduct.png"
+            alt=""
+            width={30}
+            style={{
+               backgroundColor: "rgb(252, 252, 252)",
+              border: "1.5px solid  #fff",
+              borderRadius: "80%",
+              padding: "0px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
+        );
         setSelectedMenu("stdtimeReport");
         break;
       case "/standard_time_various_types_of_graphs":
         setMenuName("Standard Time Various Types of Graphs");
-        setMenuIcon(<img src="/analysis.png" alt="" width={30} />);
+        setMenuIcon(
+          <img
+            src="/analysis.png"
+            alt=""
+            width={30}
+            style={{
+              border: "1.5px solid  #fff",
+              borderRadius: "80%",
+              padding: "0px",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
+        );
         setSelectedMenu("stdtimeGraphs");
         break;
       case "/home":
         setMenuName("SMART STANDARD TIME MANAGEMENT");
-        setMenuIcon(<img src="/home.png" alt="" width={30} style={{ filter: 'brightness(0) invert(1)' }} />);
+        setMenuIcon(
+          <img
+            src="/home.png"
+            alt=""
+            width={30}
+            style={{ filter: "brightness(0) invert(1)" }}
+          />
+        );
         setSelectedMenu("stdtimeGraphs");
         break;
     }
@@ -292,7 +343,6 @@ export default function Navbar({ onToggle }) {
             </List>
           </div> */}
 
-          
           {/* //*Similar ****************************************************** */}
           <div
             className={`${
@@ -331,7 +381,11 @@ export default function Navbar({ onToggle }) {
                     justifyContent: "center",
                   }}
                 >
-                  <img src="/StandardTimeSimilarStructure.png" alt="" width={30} />
+                  <img
+                    src="/StandardTimeSimilarStructure.png"
+                    alt=""
+                    width={30}
+                  />
                 </ListItemIcon>
                 <ListItemText
                   primary="Standard Time Table"
@@ -366,6 +420,8 @@ export default function Navbar({ onToggle }) {
                     selectedMenu === "stdtimeReport"
                       ? "2px solid #1976d2"
                       : "none",
+                  Width: 10000,
+
                   backgroundColor:
                     selectedMenu === "stdtimeReport"
                       ? "#E3F2FD"
@@ -383,10 +439,14 @@ export default function Navbar({ onToggle }) {
                     justifyContent: "center",
                   }}
                 >
-                  <img src="/StandardTimeReportByProduct.png" alt="" width={30} />
+                  <img
+                    src="/StandardTimeReportByProduct.png"
+                    alt=""
+                    width={30}
+                  />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Standard Time Table"
+                  primary="Standard Time Report By Product"
                   sx={{ opacity: open ? 1 : 0 }}
                 />
               </ListItemButton>
@@ -439,299 +499,6 @@ export default function Navbar({ onToggle }) {
               </ListItemButton>
             </ListItem>
           </List>
-
-          {/* smartsus_master_use_mat_fin
-          <div className={`${getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Master data mapping use MAT [FIN]")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_master_use_mat_fin"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border: selectedMenu === "mFin" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor: selectedMenu === "mFin" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/fin.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Master FIN"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartsus_sus_delivery_order */}
-          {/* <div className={`${getUserRoleNo === 2 || getUserRoleNo === 2 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("SUS Delivery Order Management")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_sus_delivery_order"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/sus-delivery.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="SUS Delivery order"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartsus_sus_delivery_order_new
-          <div className={`${getUserRoleNo === 2 || getUserRoleNo === 2 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("SUS Delivery Order Management (NEW VERSION)")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_sus_delivery_order_new"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border: selectedMenu === "pln_new" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor: selectedMenu === "pln_new" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/sus-delivery.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="SUS Delivery (PLN)"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartsus_upload_stock_sus_final
-          <div className={`${getUserRoleNo === 2 || getUserRoleNo === 2 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Stock SUS plate (Final)")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_upload_stock_sus_final"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border: selectedMenu === "fin" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor: selectedMenu === "fin" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/stock-fin.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Stock SUS FIN"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartsus_summary_sus_purchaser */}
-          {/* <div className={`${getUserRoleNo === 3 || getUserRoleNo === 3 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Summary SUS Plate by Item Material (Purchaser)")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_summary_sus_purchaser"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 3 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/purchase-order.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Summary Report (PUR)"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartsus_summary_sus_purchaser_new
-          <div className={`${getUserRoleNo === 3 || getUserRoleNo === 3 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Summary SUS Plate by Item Material (Purchaser)")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartsus_summary_sus_purchaser_new"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border: selectedMenu === "pur" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor: selectedMenu === "pur" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/purchase-order.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Summary MAT (PUR)"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
-
-          {/* smartSus_upload_sus_vendor_confirm
-          <div className={`${getUserRoleNo === 3 || getUserRoleNo === 3 ? "hidden" : "block"}`}>
-            <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Data plan from vendor confirm")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartSus_upload_sus_vendor_confirm"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border: selectedMenu === "ven" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor: selectedMenu === "ven" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/supplier.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Upload VD. Confirm"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
         </Drawer>
       </Box>
     </>
