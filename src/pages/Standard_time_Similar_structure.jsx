@@ -854,7 +854,7 @@ export default function StandardTimeSimilarStructure() {
               lineHeight: 1.18,
               transition: 'all 0.18s',
             }}>
-              Standard Time Similar Structure
+              STANDARD TIME SIMILAR STRUCTURE
             </h1>
             <div style={{
               fontSize: 15,

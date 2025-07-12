@@ -143,10 +143,10 @@ export default function Navbar({ onToggle }) {
           <img
             src="/StandardTimeSimilarStructure.png"
             alt=""
-            width={30}
+            width={35}
             style={{
               backgroundColor: "rgb(252, 252, 252)",
-              border: "1.5px solid  #fff",
+              border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
               display: "inline-flex",
@@ -163,10 +163,10 @@ export default function Navbar({ onToggle }) {
           <img
             src="/StandardTimeReportByProduct.png"
             alt=""
-            width={30}
+            width={35}
             style={{
-               backgroundColor: "rgb(252, 252, 252)",
-              border: "1.5px solid  #fff",
+               backgroundColor: "rgb(255, 255, 255)",
+              border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
               display: "inline-flex",
