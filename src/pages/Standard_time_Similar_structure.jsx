@@ -172,14 +172,15 @@ export default function StandardTimeSimilarStructure() {
         setProgressPercent(prev => {
           if (exportProgress.done) return 100;
           if (prev < exportProgress.percent) {
-            // Smoothly catch up to real percent
-            return Math.min(exportProgress.percent, prev + 2);
+            // Interpolate with small step for ultra-smooth progress
+            const step = Math.max(0.25, (exportProgress.percent - prev) / 12);
+            return Math.min(exportProgress.percent, prev + step);
           }
-          // If stuck, nudge forward slowly but never reach 100 until done
-          if (prev < 99) return prev + 1;
+          // If stuck, nudge forward very slowly but never reach 100 until done
+          if (prev < 99.5) return prev + 0.15;
           return prev;
         });
-      }, 60);
+      }, 18); // Faster interval for smoothest animation
     } else {
       setProgressPercent(0);
       if (progressTimer.current) clearInterval(progressTimer.current);

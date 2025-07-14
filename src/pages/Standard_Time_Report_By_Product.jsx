@@ -1009,7 +1009,7 @@ export default function StandardTimeReportByProduct() {
               width: '93.8%',
               maxWidth: '100vw',
               minHeight: '350px',
-              height: 'calc(100vh - 270px)',
+              height: 'calc(100vh - 370px)', // reduce height by 100px
               background: '#fff',
               border: '1.5px solid #e0e0e0',
               borderRadius: '12px',
