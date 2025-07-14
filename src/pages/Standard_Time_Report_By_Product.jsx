@@ -1006,47 +1006,47 @@ export default function StandardTimeReportByProduct() {
             <div style={{
               position: 'relative',
               marginLeft: '80px',
-              width: '93.8%', 
-              maxWidth: '100vw', 
+              width: '93.8%',
+              maxWidth: '100vw',
               minHeight: '350px',
-              height: 'calc(100vh - 270px)', 
+              height: 'calc(100vh - 270px)',
               background: '#fff',
-              border: '2px solid rgb(8, 50, 216)',
-              borderRadius: '10px',
-              boxShadow: '0 2px 12px 0 hsla(254, 76.90%, 74.50%, 0.08)',
-              overflowX: 'auto', 
+              border: '1.5px solid #e0e0e0',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px 0 rgba(33, 150, 243, 0.07)',
+              overflowX: 'auto',
               overflowY: 'auto',
               padding: 0,
-              marginTop: '0px', 
+              marginTop: '0px',
               zIndex: 10,
             }}>
-              <table className="w-full border-collapse min-w-max" style={{ borderColor: 'black' }}>
+              <table className="w-full border-collapse min-w-max" style={{ borderColor: '#e0e0e0' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
-                  <tr className="bg-[#1976d2] text-white font-semibold text-base border border-black">
-                    <th className="border border-black p-2 sticky-col-header" style={{ position: 'sticky', left: 0, width: 140, minWidth: 140, maxWidth: 140 ,zIndex: 1000, borderLeft: '1.5px solid black', borderRight: '1.5px solid black' }}>Product Name</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 10, borderRight: '1.5px solid black' }}>Seq</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Process</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Factory</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Unit</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Wc</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Formula Group</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Sht.Width</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Sht.Len</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Sht./Lot</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Pcs/Sht</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Pcs/Lot</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Min./Lot</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Sec/Sht.</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Sec/Pcs.</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>UPH</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Create By</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Create Date</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Update By</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Update Date</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Prd Forecast</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Prd Wip</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Prd Stdtime</th>
-                    <th className="border border-black p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid black' }}>Remark</th>
+                  <tr className="bg-[#1976d2] text-white font-semibold text-base border border-[#e0e0e0]">
+                    <th className="border border-[#e0e0e0] p-2 sticky-col-header" style={{ position: 'sticky', left: 0, width: 140, minWidth: 140, maxWidth: 140 ,zIndex: 1000, borderLeft: '1.5px solid #e0e0e0', borderRight: '1.5px solid #e0e0e0', background: '#1976d2', color: '#fff' }}>Product Name</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 10, borderRight: '1.5px solid #e0e0e0' }}>Seq</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Process</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Factory</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Unit</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Wc</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Formula Group</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Sht.Width</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Sht.Len</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Sht./Lot</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Pcs/Sht</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Pcs/Lot</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Min./Lot</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Sec/Sht.</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Sec/Pcs.</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>UPH</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Create By</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Create Date</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Update By</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Update Date</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Prd Forecast</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Prd Wip</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Prd Stdtime</th>
+                    <th className="border border-[#e0e0e0] p-2" style={{ position: 'sticky', top: 0, background: '#1976d2', color: '#fff', zIndex: 3, borderRight: '1.5px solid #e0e0e0' }}>Remark</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1055,30 +1055,30 @@ export default function StandardTimeReportByProduct() {
                   ) : (
                     tableData.map((row, idx) => (
                       <tr key={idx}>
-                        <td className="border border-black p-2 sticky-col-left" style={{ position: 'sticky', left: 0, width: 140, minWidth: 140, maxWidth: 140, borderLeft: '1.5px solid black', borderRight: '1.5px solid black' }}>{row.prd_name || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.ro_seq) || row.ro_seq === null || row.ro_seq === undefined || row.ro_seq === '' ? '-' : row.ro_seq}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.proc_disp || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.factory_desc || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.fac_unit_desc || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.wc) || row.wc === null || row.wc === undefined || row.wc === '' ? '-' : row.wc}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.grp_name || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.ro_sht_width) || row.ro_sht_width === null || row.ro_sht_width === undefined || row.ro_sht_width === '' ? '-' : row.ro_sht_width}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.ro_sht_length) || row.ro_sht_length === null || row.ro_sht_length === undefined || row.ro_sht_length === '' ? '-' : row.ro_sht_length}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.ro_sht_lot) || row.ro_sht_lot === null || row.ro_sht_lot === undefined || row.ro_sht_lot === '' ? '-' : row.ro_sht_lot}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.ro_pcs_sht) || row.ro_pcs_sht === null || row.ro_pcs_sht === undefined || row.ro_pcs_sht === '' ? '-' : row.ro_pcs_sht}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.pcs_lot) || row.pcs_lot === null || row.pcs_lot === undefined || row.pcs_lot === '' ? '-' : row.pcs_lot}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.min_lot) || row.min_lot === null || row.min_lot === undefined || row.min_lot === '' ? '-' : row.min_lot}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.sec_sheet) || row.sec_sheet === null || row.sec_sheet === undefined || row.sec_sheet === '' ? '-' : row.sec_sheet}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.sec_pcs) || row.sec_pcs === null || row.sec_pcs === undefined || row.sec_pcs === '' ? '-' : row.sec_pcs}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{isNaN(row.uph) || row.uph === null || row.uph === undefined || row.uph === '' ? '-' : row.uph}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.create_by || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.create_date || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.update_by || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.update_date || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.prd_forecast || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.prd_wip || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.prd_stdtime || '-'}</td>
-                        <td className="border border-black p-2" style={{ borderRight: '1.5px solid black' }}>{row.remark || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2 sticky-col-left" style={{ position: 'sticky', left: 0, width: 140, minWidth: 140, maxWidth: 140, borderLeft: '1.5px solid #e0e0e0', borderRight: '1.5px solid #e0e0e0', background: '#fff' }}>{row.prd_name || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.ro_seq) || row.ro_seq === null || row.ro_seq === undefined || row.ro_seq === '' ? '-' : row.ro_seq}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.proc_disp || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.factory_desc || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.fac_unit_desc || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.wc) || row.wc === null || row.wc === undefined || row.wc === '' ? '-' : row.wc}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.grp_name || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.ro_sht_width) || row.ro_sht_width === null || row.ro_sht_width === undefined || row.ro_sht_width === '' ? '-' : row.ro_sht_width}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.ro_sht_length) || row.ro_sht_length === null || row.ro_sht_length === undefined || row.ro_sht_length === '' ? '-' : row.ro_sht_length}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.ro_sht_lot) || row.ro_sht_lot === null || row.ro_sht_lot === undefined || row.ro_sht_lot === '' ? '-' : row.ro_sht_lot}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.ro_pcs_sht) || row.ro_pcs_sht === null || row.ro_pcs_sht === undefined || row.ro_pcs_sht === '' ? '-' : row.ro_pcs_sht}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.pcs_lot) || row.pcs_lot === null || row.pcs_lot === undefined || row.pcs_lot === '' ? '-' : row.pcs_lot}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.min_lot) || row.min_lot === null || row.min_lot === undefined || row.min_lot === '' ? '-' : row.min_lot}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.sec_sheet) || row.sec_sheet === null || row.sec_sheet === undefined || row.sec_sheet === '' ? '-' : row.sec_sheet}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.sec_pcs) || row.sec_pcs === null || row.sec_pcs === undefined || row.sec_pcs === '' ? '-' : row.sec_pcs}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{isNaN(row.uph) || row.uph === null || row.uph === undefined || row.uph === '' ? '-' : row.uph}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.create_by || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.create_date || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.update_by || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.update_date || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.prd_forecast || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.prd_wip || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.prd_stdtime || '-'}</td>
+                        <td className="border border-[#e0e0e0] p-2" style={{ borderRight: '1.5px solid #e0e0e0' }}>{row.remark || '-'}</td>
                       </tr>
                     ))
                   )}

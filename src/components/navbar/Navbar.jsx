@@ -317,7 +317,7 @@ export default function Navbar() {
               <ListItemButton
                 selected={selectedMenu === "stdtime"}
                 onClick={() => {
-                  setMenuName("Standard Time Similar Structure");
+                  setMenuName("STANDARD TIME SIMILAR STRUCTURE");
                   setSelectedMenu("stdtime");
                 }}
                 component={Link}
@@ -325,7 +325,7 @@ export default function Navbar() {
                 sx={{
                   minHeight: 46,
                   borderRadius: 2.5,
-                  px: 2.5,
+                  px: 1.7,
                   py: 1.2,
                   boxShadow: selectedMenu === "stdtime" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
                   background: selectedMenu === "stdtime" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
@@ -371,7 +371,7 @@ export default function Navbar() {
               <ListItemButton
                 selected={selectedMenu === "stdtimeReport"}
                 onClick={() => {
-                  setMenuName("Standard Time Report By Product.");
+                  setMenuName("STANDARD TIME REPORT BY PRODUCT");
                   setSelectedMenu("stdtimeReport");
                 }}
                 component={Link}
@@ -379,7 +379,7 @@ export default function Navbar() {
                 sx={{
                   minHeight: 46,
                   borderRadius: 2.5,
-                  px: 2.5,
+                  px: 1.7,
                   py: 1.2,
                   boxShadow: selectedMenu === "stdtimeReport" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
                   background: selectedMenu === "stdtimeReport" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
@@ -433,7 +433,7 @@ export default function Navbar() {
                 sx={{
                   minHeight: 46,
                   borderRadius: 2.5,
-                  px: 2.5,
+                  px: 1.7,
                   py: 1.2,
                   boxShadow: selectedMenu === "stdtimeGraphs" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
                   background: selectedMenu === "stdtimeGraphs" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
@@ -494,7 +494,7 @@ export default function Navbar() {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#000000c3',
+                    color: '#000000e0',
                     fontWeight: 500,
                     fontSize: 13,
                     letterSpacing: 0.2,
