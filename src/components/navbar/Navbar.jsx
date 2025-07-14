@@ -145,7 +145,7 @@ export default function Navbar({ onToggle }) {
             alt=""
             width={35}
             style={{
-              backgroundColor: "rgb(252, 252, 252)",
+              backgroundColor: "rgba(255, 255, 255, 0.83) ",
               border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
@@ -165,7 +165,7 @@ export default function Navbar({ onToggle }) {
             alt=""
             width={35}
             style={{
-               backgroundColor: "rgb(255, 255, 255)",
+               backgroundColor: "rgba(255, 255, 255, 0.85)",
               border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
@@ -291,57 +291,6 @@ export default function Navbar({ onToggle }) {
             </IconButton>
           </DrawerHeader>
           <Divider />
-
-          {/* //*Menu list ****************************************************** */}
-          {/* smartSus_monitoring_update_table */}
-          {/* <div
-            className={`${
-              getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
-            }`}
-          > */}
-          {/* <List open={open}>
-              <ListItem
-                onClick={() => setMenuName("Monitoring update data on Table")}
-                disablePadding
-                sx={{ display: "block", color: "black" }}
-                component={Link}
-                to="/smartSus_monitoring_update_table"
-              >
-                <ListItemButton
-                  sx={{
-                    minHeight: 48,
-                    justifyContent: open ? "initial" : "center",
-                    px: 2.5,
-                    border:
-                      selectedMenu === "mon" ? "2px solid #1976d2" : "none", // เพิ่ม border เมื่อเลือก
-                    borderRadius: "8px", // Optional: เพิ่มความโค้งของขอบ
-                    backgroundColor:
-                      selectedMenu === "mon" ? "#E3F2FD" : "transparent", // Optional: เพิ่มสีพื้นหลังขณะ active
-                    marginBottom: -1, // เพิ่มระยะห่างระหว่างรายการ
-                    marginTop: -0.6, // เพิ่มระยะห่างระหว่างรายการ
-                  }}
-                >
-                  <ListItemIcon
-                    sx={{
-                      minWidth: 0,
-                      mr: open ? 2 : "auto",
-                      justifyContent: "center",
-                      color: "inherit", // Set initial color
-                      "&:hover": {
-                        color: "primary.main", // Change color on hover
-                      },
-                    }}
-                  >
-                    <img src="/update.png" alt="" width={30} />
-                  </ListItemIcon>
-                  <ListItemText
-                    primary="Monitor Table"
-                    sx={{ opacity: open ? 1 : 0 }}
-                  />
-                </ListItemButton>
-              </ListItem>
-            </List>
-          </div> */}
 
           {/* //*Similar ****************************************************** */}
           <div
