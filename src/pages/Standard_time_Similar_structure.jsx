@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Navbar from "../components/navbar/Navbar";
 import Box from "@mui/material/Box";
 import axios from "axios";
+
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import Button from "@mui/material/Button";
@@ -55,6 +56,8 @@ export default function StandardTimeSimilarStructure() {
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [loadingLoaded, setLoadingLoaded] = useState(0);
   const [loadingSandToData, setLoadingSandToData] = useState(false);
+  // Ref for canceling Sand to Data loading
+  const sandToDataCancelRef = useRef(false);
   // -------------------- State --------------------
   const [isNavbarOpen, setIsNavbarOpen] = useState(false);
 
@@ -216,6 +219,7 @@ export default function StandardTimeSimilarStructure() {
       reverseButtons: true
     });
     if (result.isConfirmed) {
+      sandToDataCancelRef.current = false;
       setLoadingSandToData(true);
       setLoadingPercent(0);
       setLoadingLoaded(0);
@@ -248,6 +252,10 @@ export default function StandardTimeSimilarStructure() {
       } catch {}
       // Fetch all pages
       while (allData.length < totalRows) {
+        // Check for cancel before each fetch
+        if (sandToDataCancelRef.current) {
+          break;
+        }
         try {
           const res = await axios.get(url, { params: { ...paramsBase, page: pageIdx, pageSize: pageSizeFetch } });
           let rows = [];
@@ -273,26 +281,29 @@ export default function StandardTimeSimilarStructure() {
           break;
         }
       }
-      // LOG only the required fields (English)
-      const logData = allData.map(row => ({
-        prd_item: row.prd_item || row.item || '',
-        proc_id: row.proc_id || '',
-        sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
-        create_by: row.create_by || '',
-        update_by: row.update_by || '',
-        similar_type: row.similar_type || row.remark || '',
-      }));
-      logData.forEach((item, idx) => {
-        console.log(`Record ${idx + 1}:`);
-        Object.entries(item).forEach(([key, value]) => {
-          console.log(`  ${key}: ${value}`);
+      // Only send/log data if NOT canceled
+      if (!sandToDataCancelRef.current) {
+        // LOG only the required fields (English)
+        const logData = allData.map(row => ({
+          prd_item: row.prd_item || row.item || '',
+          proc_id: row.proc_id || '',
+          sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
+          create_by: row.create_by || '',
+          update_by: row.update_by || '',
+          similar_type: row.similar_type || row.remark || '',
+        }));
+        logData.forEach((item, idx) => {
+          console.log(`Record ${idx + 1}:`);
+          Object.entries(item).forEach(([key, value]) => {
+            console.log(`  ${key}: ${value}`);
+          });
         });
-      });
-      setDialog({
-        open: true,
-        message: `Preparing to send ${logData.length.toLocaleString()} records (mock only, not connected to real API)`,
-        severity: "info",
-      });
+        setDialog({
+          open: true,
+          message: `Preparing to send ${logData.length.toLocaleString()} records (mock only, not connected to real API)`,
+          severity: "info",
+        });
+      }
       setLoadingSandToData(false);
       setLoadingPercent(0);
       setLoadingLoaded(0);
@@ -749,24 +760,81 @@ export default function StandardTimeSimilarStructure() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 18,
-            padding: 32,
-            background: 'rgba(255,255,255,0.95)',
-            borderRadius: 18,
-            boxShadow: '0 4px 24px 0 rgba(25,118,210,0.13)',
+            gap: 22,
+            padding: 40,
+            background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
+            borderRadius: 32,
+            boxShadow: '0 12px 48px 0 rgba(25,118,210,0.18)',
             border: '2px solid #1976d2',
-            minWidth: 320,
+            minWidth: 340,
+            maxWidth: 420,
+            transition: 'box-shadow 0.3s, border 0.3s',
           }}>
-            <svg width="60" height="60" viewBox="0 0 50 50" style={{ marginBottom: 8 }}>
-              <circle cx="25" cy="25" r="20" fill="none" stroke="#1976d2" strokeWidth="6" strokeDasharray="31.4 31.4" strokeLinecap="round">
-                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.9s" repeatCount="indefinite" />
-              </circle>
-            </svg>
-            <div style={{ fontSize: 22, color: '#1976d2', fontWeight: 700 }}>Loading... <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(loadingPercent))}%</span></div>
-            <div style={{ fontSize: 16, color: '#1976d2', fontWeight: 400 }}>Loading all data, please wait...</div>
-            <div style={{ fontSize: 15, color: '#1976d2', fontWeight: 400 }}>
-              Loaded <span style={{ color: '#1976d2', fontWeight: 700 }}>{loadingLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{total.toLocaleString()}</span> records
+            {/* Modern animated loader */}
+            <div style={{
+              width: 74,
+              height: 74,
+              marginBottom: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+            }}>
+              <svg width="74" height="74" viewBox="0 0 74 74" style={{ position: 'absolute', left: 0, top: 0 }}>
+                <circle cx="37" cy="37" r="32" fill="none" stroke="#1976d2" strokeWidth="7" strokeDasharray="60 60" strokeLinecap="round">
+                  <animateTransform attributeName="transform" type="rotate" from="0 37 37" to="360 37 37" dur="1.1s" repeatCount="indefinite" />
+                </circle>
+              </svg>
+              <svg width="74" height="74" viewBox="0 0 74 74" style={{ position: 'absolute', left: 0, top: 0 }}>
+                <circle cx="37" cy="37" r="24" fill="none" stroke="#0baae5" strokeWidth="5" strokeDasharray="38 38" strokeLinecap="round">
+                  <animateTransform attributeName="transform" type="rotate" from="360 37 37" to="0 37 37" dur="1.6s" repeatCount="indefinite" />
+                </circle>
+              </svg>
             </div>
+            <div style={{ fontSize: 28, color: '#1976d2', fontWeight: 900, marginBottom: 8, letterSpacing: 1.1, textShadow: '0 2px 12px #b3d8ff', fontFamily: 'Poppins, Segoe UI, sans-serif' }}>
+              Loading... <span style={{ color: '#0baae5', fontWeight: 900 }}>{Math.min(100, Math.round(loadingPercent))}%</span>
+            </div>
+            <div style={{ fontSize: 18, color: '#1976d2', fontWeight: 600, marginBottom: 8, textShadow: '0 1px 8px #b3d8ff', fontFamily: 'Poppins, Segoe UI, sans-serif' }}>
+              Loading all data, please wait...
+            </div>
+            <div style={{ fontSize: 17, color: '#1976d2', fontWeight: 700, textShadow: '0 1px 8px #b3d8ff', fontFamily: 'Poppins, Segoe UI, sans-serif' }}>
+              Loaded <span style={{ color: '#0baae5', fontWeight: 900 }}>{loadingLoaded.toLocaleString()}</span> / <span style={{ color: '#0baae5', fontWeight: 900 }}>{total.toLocaleString()}</span> records
+            </div>
+            {/* Cancel Button */}
+            <button
+              onClick={async () => {
+                sandToDataCancelRef.current = true;
+                setLoadingSandToData(false);
+                setLoadingPercent(0);
+                setLoadingLoaded(0);
+                if (typeof Swal !== 'undefined') {
+                  await Swal.fire({
+                    icon: 'info',
+                    title: 'Canceled',
+                    text: 'Loading has been canceled.',
+                    confirmButtonColor: '#1976d2',
+                    timer: 1800
+                  });
+                }
+              }}
+              style={{
+                marginTop: 18,
+                fontWeight: 900,
+                fontSize: 20,
+                borderRadius: 14,
+                padding: '12px 38px',
+                background: 'linear-gradient(90deg, #e53935 60%,rgb(214, 50, 56) 100%)',
+                color: '#fff',
+                boxShadow: '0 4px 18px 0 #e53935',
+                letterSpacing: 1.1,
+                textShadow: '0 2px 12px #e53935',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background 0.22s, box-shadow 0.22s',
+              }}
+            >
+              CANCEL
+            </button>
           </div>
         </div>
       )}
@@ -1408,65 +1476,88 @@ export default function StandardTimeSimilarStructure() {
       {exporting && (
         <Dialog open={true} maxWidth="xs" fullWidth PaperProps={{
           style: {
-            background: '#fff',
-            boxShadow: '0 8px 32px 0 rgba(76, 153, 235, 0.18)',
-            borderRadius: 24,
+            background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
+            boxShadow: '0 12px 48px 0 rgba(76, 153, 235, 0.22)',
+            borderRadius: 32,
             padding: 0,
             overflow: 'visible',
-            backdropFilter: 'blur(8px)',
-            border: '1.5px solid #1976d2',
-            minWidth: 380,
-            maxWidth: 480,
+            backdropFilter: 'blur(12px)',
+            border: '2px solid #1976d2',
+            minWidth: 400,
+            maxWidth: 500,
             position: 'relative',
+            transition: 'box-shadow 0.3s, border 0.3s',
           }
         }}>
           <DialogTitle style={{
             textAlign: 'center',
-            fontWeight: 800,
-            color: '#1976d2',
-            fontSize: 30,
-            letterSpacing: 1.2,
-            background: 'linear-gradient(90deg,rgb(0, 132, 255) 60%,rgb(11, 128, 238) 100%)',
-            borderTopLeftRadius: 24,
-            borderTopRightRadius: 24,
-            padding: '28px 0 18px 0',
+            fontWeight: 900,
+            color: '#fff',
+            fontSize: 34,
+            letterSpacing: 1.5,
+            background: 'linear-gradient(90deg,#1976d2 60%,#0baae5 100%)',
+            borderTopLeftRadius: 32,
+            borderTopRightRadius: 32,
+            padding: '32px 0 20px 0',
             marginBottom: 0,
-            boxShadow: '0 2px 12px 0 rgba(255, 255, 255, 0.08)',
+            boxShadow: '0 2px 16px 0 rgba(25,118,210,0.10)',
+            textShadow: '0 2px 12px rgba(25,118,210,0.18)',
+            fontFamily: 'Poppins, Segoe UI, sans-serif',
+            transition: 'background 0.3s',
           }}>
             <span style={{
               fontWeight: 900,
-              fontSize: 32,
-              letterSpacing: 1.2,
+              fontSize: 34,
+              letterSpacing: 1.5,
               color: 'rgb(255, 255, 255)',
+              textShadow: '0 2px 12px rgba(25,118,210,0.18)',
+              fontFamily: 'Poppins, Segoe UI, sans-serif',
             }}>EXPORTING EXCEL</span>
           </DialogTitle>
           <DialogContent style={{
             textAlign: 'center',
-            padding: '32px 32px 24px 32px',
+            padding: '36px 36px 28px 36px',
             background: 'transparent',
-            borderBottomLeftRadius: 24,
-            borderBottomRightRadius: 24,
+            borderBottomLeftRadius: 32,
+            borderBottomRightRadius: 32,
             position: 'relative',
+            boxShadow: '0 2px 16px 0 rgba(25,118,210,0.08)',
+            fontFamily: 'Poppins, Segoe UI, sans-serif',
           }}>
             <div style={{ margin: '18px 0 12px 0', width: '100%' }}>
-              {/* Glassy progress bar */}
+              {/* Cute animated GIF for download */}
+              <img src="/download-folder.gif" alt="Downloading..." style={{
+                width: 90,
+                height: 90,
+                marginBottom: 16,
+                borderRadius: 22,
+                boxShadow: '0 4px 18px 0 #b3d8ff',
+                background: 'linear-gradient(120deg, #e3f0ff 60%, #fafdff 100%)',
+                objectFit: 'cover',
+                display: 'inline-block',
+                animation: 'bounce 1.4s infinite cubic-bezier(.4,1.6,.6,1)',
+                border: '2.5px solid #1976d2',
+                transition: 'box-shadow 0.3s, border 0.3s',
+              }} />
+              {/* Glassy progress bar with smooth gradient and shadow */}
               <div style={{
                 width: '100%',
-                height: 22,
-                background: 'rgba(230,240,255,0.7)',
-                borderRadius: 12,
+                height: 24,
+                background: 'linear-gradient(90deg, #e3f0ff 0%, #b3d8ff 100%)',
+                borderRadius: 14,
                 overflow: 'hidden',
-                marginBottom: 18,
-                boxShadow: '0 2px 12px 0 #b3d8ff',
-                border: '1.5px solid #1976d2',
+                marginBottom: 22,
+                boxShadow: '0 4px 18px 0 #b3d8ff',
+                border: '2px solid #1976d2',
                 position: 'relative',
+                transition: 'box-shadow 0.3s, border 0.3s',
               }}>
                 <div style={{
                   width: `${progressPercent}%`,
                   height: '100%',
                   background: 'linear-gradient(90deg, #1976d2 60%, #0baae5 100%)',
-                  transition: 'width 0.25s cubic-bezier(.4,2,.6,1)',
-                  borderRadius: 12,
+                  transition: 'width 0.35s cubic-bezier(.4,1.6,.6,1)',
+                  borderRadius: 14,
                   boxShadow: '0 2px 12px 0 #b3d8ff',
                   position: 'absolute',
                   left: 0,
@@ -1480,39 +1571,39 @@ export default function StandardTimeSimilarStructure() {
                   width: `${progressPercent}%`,
                   height: '100%',
                   background: 'linear-gradient(120deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0.18) 100%)',
-                  animation: 'shimmer 1.2s infinite',
-                  borderRadius: 12,
+                  animation: 'shimmer 1.2s infinite linear',
+                  borderRadius: 14,
                   pointerEvents: 'none',
                   zIndex: 2,
                 }} />
               </div>
-              <div style={{ fontSize: 22, fontWeight: 700, color: '#1976d2', marginBottom: 8, letterSpacing: 0.5 }}>
+              <div style={{ fontSize: 24, fontWeight: 800, color: '#1976d2', marginBottom: 10, letterSpacing: 0.7, textShadow: '0 1px 8px #b3d8ff' }}>
                 Progress: <span style={{ color: '#0baae5' }}>{Math.min(100, Math.round(progressPercent))}%</span>
               </div>
-              <div style={{ fontSize: 17, color: '#1976d2', marginBottom: 8, fontWeight: 500 }}>
-                Loading by page: <span style={{ color: '#1976d2', fontWeight: 700 }}>{progressLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{exportProgress.total.toLocaleString()}</span> rows
+              <div style={{ fontSize: 18, color: '#1976d2', marginBottom: 10, fontWeight: 600, textShadow: '0 1px 8px #b3d8ff' }}>
+                Loading by page: <span style={{ color: '#1976d2', fontWeight: 800 }}>{progressLoaded.toLocaleString()}</span> / <span style={{ color: '#1976d2', fontWeight: 800 }}>{exportProgress.total.toLocaleString()}</span> rows
               </div>
               {/* --- Add page/chunk info --- */}
               {exportProgress.total > 0 && (
-                <div style={{ fontSize: 15, color: '#1976d2', marginBottom: 2, fontWeight: 500 }}>
-                  Page <span style={{ color: '#1976d2', fontWeight: 700 }}>{Math.max(1, Math.ceil(progressLoaded / 20000))}</span> / <span style={{ color: '#1976d2', fontWeight: 700 }}>{Math.max(1, Math.ceil(exportProgress.total / 20000))}</span>
+                <div style={{ fontSize: 16, color: '#1976d2', marginBottom: 4, fontWeight: 700, textShadow: '0 1px 8px #b3d8ff' }}>
+                  Page <span style={{ color: '#1976d2', fontWeight: 900 }}>{Math.max(1, Math.ceil(progressLoaded / 20000))}</span> / <span style={{ color: '#1976d2', fontWeight: 900 }}>{Math.max(1, Math.ceil(exportProgress.total / 20000))}</span>
                 </div>
               )}
             </div>
             {!exportProgress.done && (
               <Button variant="contained" color="error" style={{
-                marginTop: 18,
-                fontWeight: 800,
-                fontSize: 20,
-                borderRadius: 12,
-                padding: '12px 38px',
+                marginTop: 22,
+                fontWeight: 900,
+                fontSize: 22,
+                borderRadius: 14,
+                padding: '14px 44px',
                 background: 'linear-gradient(90deg, #e53935 60%,rgb(214, 50, 56) 100%)',
                 color: '#fff',
-                boxShadow: '0 2px 12px 0 #e53935',
-                letterSpacing: 1.1,
-                textShadow: '0 1px 8px #e53935',
+                boxShadow: '0 4px 18px 0 #e53935',
+                letterSpacing: 1.2,
+                textShadow: '0 2px 12px #e53935',
                 border: 'none',
-                transition: 'background 0.18s, box-shadow 0.18s',
+                transition: 'background 0.22s, box-shadow 0.22s',
               }} onClick={handleCancelExport}>
                 CANCEL
               </Button>
@@ -1521,6 +1612,10 @@ export default function StandardTimeSimilarStructure() {
               @keyframes shimmer {
                 0% { background-position: -200px 0; }
                 100% { background-position: 200px 0; }
+              }
+              @keyframes bounce {
+                0%, 100% { transform: translateY(0); }
+                50% { transform: translateY(-16px); }
               }
             `}</style>
           </DialogContent>

@@ -195,7 +195,7 @@ export default function Navbar() {
         setMenuName("Standard Time Various Types of Graphs");
         setMenuIcon(
           <img
-            src="/analysis.png"
+            src="/Chart.png"
             alt=""
             width={30}
             style={{
@@ -220,7 +220,7 @@ export default function Navbar() {
             style={{ filter: "brightness(0) invert(1)" }}
           />
         );
-        setSelectedMenu("stdtimeGraphs");
+        setSelectedMenu("home");
         break;
     }
   }, [location.pathname]);
@@ -453,7 +453,7 @@ export default function Navbar() {
                 }}
               >
                 <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/analysis.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                  <img src="/Chart.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
                 </ListItemIcon>
                 <ListItemText
                   primary={
@@ -494,7 +494,7 @@ export default function Navbar() {
                 <Typography
                   variant="caption"
                   sx={{
-                    color: '#000000e0',
+                    color: 'rgba(0, 0, 0, 0.8)',
                     fontWeight: 500,
                     fontSize: 13,
                     letterSpacing: 0.2,
