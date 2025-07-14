@@ -29,6 +29,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Tooltip,
 } from "@mui/material";
 
 import AccountMenu from "./AccountMenu";
@@ -37,20 +38,22 @@ const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.enteringScreen,
+  transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
+    easing: theme.transitions.easing.easeInOut,
+    duration: 500,
   }),
   overflowX: "hidden",
+  willChange: "width, background-color, box-shadow",
 });
 
 // สร้าง mixin สำหรับสไตล์ของ Drawer เมื่อถูกปิด
 const closedMixin = (theme) => ({
-  transition: theme.transitions.create("width", {
-    easing: theme.transitions.easing.sharp,
-    duration: theme.transitions.duration.leavingScreen,
+  transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
+    easing: theme.transitions.easing.easeInOut,
+    duration: 500,
   }),
   overflowX: "hidden",
+  willChange: "width, background-color, box-shadow",
   width: `calc(${theme.spacing(7)} + 1px)`,
   [theme.breakpoints.up("sm")]: {
     width: `calc(${theme.spacing(8)} + 1px)`,
@@ -92,26 +95,37 @@ const Drawer = styled(MuiDrawer, {
   boxSizing: "border-box",
   ...(open && {
     ...openedMixin(theme),
-    "& .MuiDrawer-paper": openedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...openedMixin(theme),
+      transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
+        easing: theme.transitions.easing.easeInOut,
+        duration: 500,
+      }),
+    },
   }),
   ...(!open && {
     ...closedMixin(theme),
-    "& .MuiDrawer-paper": closedMixin(theme),
+    "& .MuiDrawer-paper": {
+      ...closedMixin(theme),
+      transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
+        easing: theme.transitions.easing.easeInOut,
+        duration: 500,
+      }),
+    },
   }),
 }));
 
-export default function Navbar({ onToggle }) {
+export default function Navbar() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
+  const showBrandText = open;
 
   const handleDrawerOpen = () => {
     setOpen(true);
-    onToggle(true); // Notify parent component
   };
 
   const handleDrawerClose = () => {
     setOpen(false);
-    onToggle(false); // Notify parent component
   };
 
   //bind value user from localstorage
@@ -298,156 +312,209 @@ export default function Navbar({ onToggle }) {
               getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
             }`}
           ></div>
-          <List open={open}>
-            <ListItem
-              onClick={() => {
-                setMenuName("Standard Time Similar Structure");
-                setSelectedMenu("stdtime");
-              }}
-              disablePadding
-              sx={{ display: "block", color: "black" }}
-              component={Link}
-              to="/standard_time_similar_structure"
-            >
+          <List sx={{ width: '100%', mt: 2, p: 0 }}>
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
+                selected={selectedMenu === "stdtime"}
+                onClick={() => {
+                  setMenuName("Standard Time Similar Structure");
+                  setSelectedMenu("stdtime");
+                }}
+                component={Link}
+                to="/standard_time_similar_structure"
                 sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
+                  minHeight: 46,
+                  borderRadius: 2.5,
                   px: 2.5,
-                  border:
-                    selectedMenu === "stdtime" ? "2px solid #1976d2" : "none",
-                  backgroundColor:
-                    selectedMenu === "stdtime" ? "#E3F2FD" : "transparent",
-                  borderRadius: "8px",
-                  marginBottom: -1,
-                  display: "flex",
+                  py: 1.2,
+                  boxShadow: selectedMenu === "stdtime" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
+                  background: selectedMenu === "stdtime" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
+                  color: selectedMenu === "stdtime" ? '#1976d2' : '#1976d2',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  overflow: 'hidden',
+                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
+                  width: '100%',
+                  maxWidth: 220,
+                  '&:hover': {
+                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                    maxWidth: 340,
+                  },
                 }}
               >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 1.3 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img
-                    src="/StandardTimeSimilarStructure.png"
-                    alt=""
-                    width={30}
-                  />
+                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src="/StandardTimeSimilarStructure.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
                 </ListItemIcon>
                 <ListItemText
-                  primary="Standard Time Table"
-                  sx={{ opacity: open ? 1 : 0 }}
+                  primary={
+                    <Tooltip title="Standard Time Table" placement="right" arrow enterDelay={300}>
+                      <span style={{
+                        fontSize: 16,
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                      }}>
+                        Standard Time Table
+                      </span>
+                    </Tooltip>
+                  }
+                  sx={{ ml: 0.5 }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                selected={selectedMenu === "stdtimeReport"}
+                onClick={() => {
+                  setMenuName("Standard Time Report By Product.");
+                  setSelectedMenu("stdtimeReport");
+                }}
+                component={Link}
+                to="/Standard_Time_Report_By_Product"
+                sx={{
+                  minHeight: 46,
+                  borderRadius: 2.5,
+                  px: 2.5,
+                  py: 1.2,
+                  boxShadow: selectedMenu === "stdtimeReport" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
+                  background: selectedMenu === "stdtimeReport" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
+                  color: selectedMenu === "stdtimeReport" ? '#1976d2' : '#1976d2',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  overflow: 'hidden',
+                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
+                  width: '100%',
+                  maxWidth: 220,
+                  '&:hover': {
+                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                    maxWidth: 340,
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src="/StandardTimeReportByProduct.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Tooltip title="Standard Time Report By Product" placement="right" arrow enterDelay={300}>
+                      <span style={{
+                        fontSize: 16,
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                      }}>
+                        Standard Time Report By Product
+                      </span>
+                    </Tooltip>
+                  }
+                  sx={{ ml: 0.5 }}
+                />
+              </ListItemButton>
+            </ListItem>
+            <ListItem disablePadding sx={{ mb: 0.5 }}>
+              <ListItemButton
+                selected={selectedMenu === "stdtimeGraphs"}
+                onClick={() => {
+                  setMenuName("Standard Time Various Types of Graphs");
+                  setSelectedMenu("stdtimeGraphs");
+                }}
+                component={Link}
+                to="/standard_time_various_types_of_graphs"
+                sx={{
+                  minHeight: 46,
+                  borderRadius: 2.5,
+                  px: 2.5,
+                  py: 1.2,
+                  boxShadow: selectedMenu === "stdtimeGraphs" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
+                  background: selectedMenu === "stdtimeGraphs" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
+                  color: selectedMenu === "stdtimeGraphs" ? '#1976d2' : '#1976d2',
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  overflow: 'hidden',
+                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
+                  width: '100%',
+                  maxWidth: 220,
+                  '&:hover': {
+                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                    maxWidth: 340,
+                  },
+                }}
+              >
+                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <img src="/analysis.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Tooltip title="Standard Time Various Graphs" placement="right" arrow enterDelay={300}>
+                      <span style={{
+                        fontSize: 16,
+                        fontWeight: 500,
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: 'block',
+                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
+                      }}>
+                        Standard Time Various Graphs
+                      </span>
+                    </Tooltip>
+                  }
+                  sx={{ ml: 0.5 }}
                 />
               </ListItemButton>
             </ListItem>
           </List>
-
-          {/* //*Report By Product ****************************************************** */}
-          <div
-            className={`${
-              getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
-            }`}
-          ></div>
-          <List open={open}>
-            <ListItem
-              onClick={() => {
-                setMenuName("Standard Time Report By Product.");
-                setSelectedMenu("stdtimeReport");
-              }}
-              component={Link}
-              to="/Standard_Time_Report_By_Product"
-            >
-              <ListItemButton
+          <Box sx={{ position: 'absolute', bottom: 0, left: 0, width: '100%', py: 2, px: 2, textAlign: 'center', bgcolor: 'transparent' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+              <Divider sx={{ width: '100%', mb: 1, borderColor: '#bfbcbcff', borderBottomWidth: 0.5, opacity: 1.80 }} />
+              <img src={Fuji} alt="Fuji Logo" style={{ width: 60, marginBottom: 10 }} />
+              <Box
                 sx={{
-                  minHeight: 48,
-                  minWidth: 58,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                  border:
-                    selectedMenu === "stdtimeReport"
-                      ? "2px solid #1976d2"
-                      : "none",
-                  Width: 10000,
-
-                  backgroundColor:
-                    selectedMenu === "stdtimeReport"
-                      ? "#E3F2FD"
-                      : "transparent",
-                  borderRadius: "8px",
-                  marginBottom: -1,
-                  display: "flex",
-                  ml: -1.7, // Adjust margin-left to align with other items
+                  height: showBrandText ? 32 : 0,
+                  overflow: 'hidden',
+                  transition: 'height 0.8s cubic-bezier(.25,0,.25,1)',
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                <ListItemIcon
+                <Typography
+                  variant="caption"
                   sx={{
-                    minWidth: 0,
-                    mr: open ? 1 : "auto",
-                    justifyContent: "center",
+                    color: '#000000c3',
+                    fontWeight: 500,
+                    fontSize: 13,
+                    letterSpacing: 0.2,
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'break-word',
+                    maxWidth: 180,
+                    margin: '0 auto',
+                    display: 'block',
+                    textAlign: 'center',
+                    opacity: showBrandText ? 1 : 0,
+                    transition: 'opacity 0.8s cubic-bezier(.25,0,.25,1)',
                   }}
                 >
-                  <img
-                    src="/StandardTimeReportByProduct.png"
-                    alt=""
-                    width={30}
-                  />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Standard Time Report By Product"
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
+                  Fujikura Electronic Components (Thailand) Ltd.
+                </Typography>
+              </Box>
+            </Box>
+          </Box>
 
-          {/* Various Types of Graphs */}
-          <List open={open}>
-            <ListItem
-              onClick={() => {
-                setMenuName("Standard Time Various Types of Graphs");
-                setSelectedMenu("stdtimeGraphs");
-              }}
-              disablePadding
-              sx={{ display: "block", color: "black" }}
-              component={Link}
-              to="/standard_time_various_types_of_graphs"
-            >
-              <ListItemButton
-                sx={{
-                  minHeight: 48,
-                  justifyContent: open ? "initial" : "center",
-                  px: 2.5,
-                  border:
-                    selectedMenu === "stdtimeGraphs"
-                      ? "2px solid #1976d2"
-                      : "none",
-                  backgroundColor:
-                    selectedMenu === "stdtimeGraphs"
-                      ? "#E3F2FD"
-                      : "transparent",
-                  borderRadius: "8px",
-                  marginBottom: -1,
-                  display: "flex",
-                }}
-              >
-                <ListItemIcon
-                  sx={{
-                    minWidth: 0,
-                    mr: open ? 2 : "auto",
-                    justifyContent: "center",
-                  }}
-                >
-                  <img src="/analysis.png" alt="" width={30} />
-                </ListItemIcon>
-                <ListItemText
-                  primary="Standard Time Various Graphs"
-                  sx={{ opacity: open ? 1 : 0 }}
-                />
-              </ListItemButton>
-            </ListItem>
-          </List>
         </Drawer>
       </Box>
     </>
