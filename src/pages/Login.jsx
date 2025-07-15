@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Button, TextField, InputAdornment, IconButton } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import LoginLogo from "../assets/Fujikura-Logo.png";

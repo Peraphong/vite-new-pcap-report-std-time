@@ -300,7 +300,7 @@ export default function StandardTimeVariousTypesOfGraphs() {
               marginBottom: 32,
             }}
           >
-            {/* Bar Graph */}
+            {/* Bar Graph
             <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(25,118,210,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(25,118,210,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #1976d2', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <FaChartBar style={{ color: '#1976d2', fontSize: 32, marginBottom: 8 }} />
               <h3 style={{ color: '#1976d2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Bar Chart</h3>
@@ -308,26 +308,26 @@ export default function StandardTimeVariousTypesOfGraphs() {
               {barData && <Bar data={barData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#1976d2', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
             </div>
             {/* Line Graph */}
-            <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(67,160,71,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(67,160,71,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #43a047', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(67,160,71,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(67,160,71,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #43a047', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <FaChartLine style={{ color: '#43a047', fontSize: 32, marginBottom: 8 }} />
               <h3 style={{ color: '#43a047', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Line Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบเส้น</span>
               {lineData && <Line data={lineData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#43a047', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
-            </div>
+            </div> */}
             {/* Pie Graph */}
-            <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(255,160,0,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(255,160,0,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #ffa000', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(255,160,0,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(255,160,0,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #ffa000', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <FaChartPie style={{ color: '#ffa000', fontSize: 32, marginBottom: 8 }} />
               <h3 style={{ color: '#ffa000', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Pie Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบวงกลม</span>
               {pieData && <Pie data={pieData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#ffa000', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
-            </div>
+            </div> */}
             {/* Doughnut Graph */}
-            <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(123,31,162,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(123,31,162,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #7b1fa2', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* <div style={{ position: 'relative', width: '98%', maxWidth: 900, height: 440, background: 'rgba(123,31,162,0.09)', borderRadius: 32, padding: 44, boxShadow: '0 8px 32px rgba(123,31,162,0.13)', boxSizing: 'border-box', transition: 'box-shadow 0.2s', border: '2.5px solid #7b1fa2', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <FaDotCircle style={{ color: '#7b1fa2', fontSize: 32, marginBottom: 8 }} />
               <h3 style={{ color: '#7b1fa2', fontWeight: 900, fontSize: 26, marginBottom: 16, letterSpacing: 1 }}>Doughnut Chart</h3>
               <span style={{ color: '#555', fontSize: 17, marginBottom: 22, display: 'block', fontWeight: 500 }}>แสดงข้อมูลในรูปแบบโดนัท</span>
               {doughnutData && <Doughnut data={doughnutData} options={{ responsive: true, plugins: { legend: { display: true, position: 'top' }, tooltip: { enabled: true, backgroundColor: '#7b1fa2', titleColor: '#fff', bodyColor: '#fff' } }, animation: { duration: 1200 } }} />}
-            </div>
+            </div> */} 
           </div>
         </Box>
       </Box>

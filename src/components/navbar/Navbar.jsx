@@ -13,15 +13,15 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import Fuji from "/Fuji.png";
 import { Link } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
-import ScaleOutlinedIcon from "@mui/icons-material/ScaleOutlined";
-import StandardTimeSimilarStructure from "../../pages/Standard_time_Similar_structure";
+// import ScaleOutlinedIcon from "@mui/icons-material/ScaleOutlined";
+// import StandardTimeSimilarStructure from "../../pages/Standard_time_Similar_structure";
 
-//*mui icon ******************************************************
-import ComputerIcon from "@mui/icons-material/Computer";
-import CableIcon from "@mui/icons-material/Cable";
-import StayPrimaryPortraitIcon from "@mui/icons-material/StayPrimaryPortrait";
-import MemoryIcon from "@mui/icons-material/Memory";
-import DomainIcon from "@mui/icons-material/Domain";
+// //*mui icon ******************************************************
+// import ComputerIcon from "@mui/icons-material/Computer";
+// import CableIcon from "@mui/icons-material/Cable";
+// import StayPrimaryPortraitIcon from "@mui/icons-material/StayPrimaryPortrait";
+// import MemoryIcon from "@mui/icons-material/Memory";
+// import DomainIcon from "@mui/icons-material/Domain";
 
 import {
   List,
@@ -38,20 +38,26 @@ const drawerWidth = 240;
 
 const openedMixin = (theme) => ({
   width: drawerWidth,
-  transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
-    easing: theme.transitions.easing.easeInOut,
-    duration: 500,
-  }),
+  transition: theme.transitions.create(
+    ["width", "background-color", "box-shadow"],
+    {
+      easing: theme.transitions.easing.easeInOut,
+      duration: 500,
+    }
+  ),
   overflowX: "hidden",
   willChange: "width, background-color, box-shadow",
 });
 
 // สร้าง mixin สำหรับสไตล์ของ Drawer เมื่อถูกปิด
 const closedMixin = (theme) => ({
-  transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
-    easing: theme.transitions.easing.easeInOut,
-    duration: 500,
-  }),
+  transition: theme.transitions.create(
+    ["width", "background-color", "box-shadow"],
+    {
+      easing: theme.transitions.easing.easeInOut,
+      duration: 500,
+    }
+  ),
   overflowX: "hidden",
   willChange: "width, background-color, box-shadow",
   width: `calc(${theme.spacing(7)} + 1px)`,
@@ -97,20 +103,26 @@ const Drawer = styled(MuiDrawer, {
     ...openedMixin(theme),
     "& .MuiDrawer-paper": {
       ...openedMixin(theme),
-      transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
-        easing: theme.transitions.easing.easeInOut,
-        duration: 500,
-      }),
+      transition: theme.transitions.create(
+        ["width", "background-color", "box-shadow"],
+        {
+          easing: theme.transitions.easing.easeInOut,
+          duration: 500,
+        }
+      ),
     },
   }),
   ...(!open && {
     ...closedMixin(theme),
     "& .MuiDrawer-paper": {
       ...closedMixin(theme),
-      transition: theme.transitions.create(["width", "background-color", "box-shadow"], {
-        easing: theme.transitions.easing.easeInOut,
-        duration: 500,
-      }),
+      transition: theme.transitions.create(
+        ["width", "background-color", "box-shadow"],
+        {
+          easing: theme.transitions.easing.easeInOut,
+          duration: 500,
+        }
+      ),
     },
   }),
 }));
@@ -179,7 +191,7 @@ export default function Navbar() {
             alt=""
             width={35}
             style={{
-               backgroundColor: "rgba(255, 255, 255, 0.85)",
+              backgroundColor: "rgba(255, 255, 255, 0.85)",
               border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
@@ -192,14 +204,15 @@ export default function Navbar() {
         setSelectedMenu("stdtimeReport");
         break;
       case "/standard_time_various_types_of_graphs":
-        setMenuName("Standard Time Various Types of Graphs");
+        setMenuName("STANDARD TIME VARIOUS TYPES OF GRAPHS");
         setMenuIcon(
           <img
             src="/Chart.png"
             alt=""
-            width={30}
+            width={35}
             style={{
-              border: "1.5px solid  #fff",
+              backgroundColor: "rgba(255, 255, 255, 0.85)",
+              border: "0.5px solid  #fff",
               borderRadius: "80%",
               padding: "0px",
               display: "inline-flex",
@@ -312,8 +325,8 @@ export default function Navbar() {
               getUserRoleNo === 2 || getUserRoleNo === 3 ? "hidden" : "block"
             }`}
           ></div>
-          <List sx={{ width: '100%', mt: 2, p: 0 }}>
-            <ListItem disablePadding sx={{ mb: 0.5 }}>
+          <List sx={{ width: "100%", mt: 2, p: 0 }}>
+            {/* List style applied directly to the List, not nested */}
               <ListItemButton
                 selected={selectedMenu === "stdtime"}
                 onClick={() => {
@@ -323,42 +336,80 @@ export default function Navbar() {
                 component={Link}
                 to="/standard_time_similar_structure"
                 sx={{
-                  minHeight: 46,
-                  borderRadius: 2.5,
-                  px: 1.7,
-                  py: 1.2,
-                  boxShadow: selectedMenu === "stdtime" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
-                  background: selectedMenu === "stdtime" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
-                  color: selectedMenu === "stdtime" ? '#1976d2' : '#1976d2',
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  overflow: 'hidden',
-                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
-                  width: '100%',
+                  minHeight: 52,
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 1.5,
+                  boxShadow:
+                    selectedMenu === "stdtime"
+                      ? "0 4px 16px rgba(25,118,210,0.13)"
+                      : "none",
+                  background:
+                    selectedMenu === "stdtime"
+                      ? "linear-gradient(90deg,#bbdefb 0%,#e3f2fd 100%)"
+                      : "transparent",
+                  color: "#1976d2",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  overflow: "hidden",
+                  transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                  width: "100%",
                   maxWidth: 220,
-                  '&:hover': {
-                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                  "&:hover": {
+                    background: "linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)",
+                    boxShadow: "0 2px 12px 0 rgba(33,150,243,0.10)",
                     maxWidth: 340,
+                    color: "#0d47a1"
                   },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/StandardTimeSimilarStructure.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                <ListItemIcon
+                  sx={{
+                    minWidth: 38,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    filter: selectedMenu === "stdtime" ? "drop-shadow(0 2px 8px #90caf9)" : "none",
+                  }}
+                >
+                  <img
+                    src="/StandardTimeSimilarStructure.png"
+                    alt=""
+                    width={selectedMenu === "stdtime" ? 30 : 30}
+                    style={{
+                      verticalAlign: "middle",
+                      borderRadius: selectedMenu === "stdtime" ? "50%" : "0%",
+                      background: selectedMenu === "stdtime" ? "#fff" : "transparent",
+                      boxShadow: selectedMenu === "stdtime" ? "0 2px 8px #bbdefb" : "none",
+                      padding: selectedMenu === "stdtime" ? "2px" : "0px",
+                      transition: "all 0.3s cubic-bezier(.4,0,.2,1)"
+                    }}
+                  />
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <Tooltip title="Standard Time Table" placement="right" arrow enterDelay={300}>
-                      <span style={{
-                        fontSize: 16,
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: 'block',
-                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                      }}>
+                    <Tooltip
+                      title="Standard Time Table"
+                      placement="right"
+                      arrow
+                      enterDelay={300}
+                    >
+                      <span
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "block",
+                          transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                          color: selectedMenu === "stdtime" ? "#0d47a1" : "#1976d2",
+                          letterSpacing: 0.2,
+                          fontFamily: "Sarabun, sans-serif"
+                        }}
+                      >
                         Standard Time Table
                       </span>
                     </Tooltip>
@@ -366,7 +417,7 @@ export default function Navbar() {
                   sx={{ ml: 0.5 }}
                 />
               </ListItemButton>
-            </ListItem>
+          
             <ListItem disablePadding sx={{ mb: 0.5 }}>
               <ListItemButton
                 selected={selectedMenu === "stdtimeReport"}
@@ -377,42 +428,81 @@ export default function Navbar() {
                 component={Link}
                 to="/Standard_Time_Report_By_Product"
                 sx={{
-                  minHeight: 46,
-                  borderRadius: 2.5,
-                  px: 1.7,
-                  py: 1.2,
-                  boxShadow: selectedMenu === "stdtimeReport" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
-                  background: selectedMenu === "stdtimeReport" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
-                  color: selectedMenu === "stdtimeReport" ? '#1976d2' : '#1976d2',
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  overflow: 'hidden',
-                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
-                  width: '100%',
+                  minHeight: 52,
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 1.5,
+                  marginTop: 0.5,
+                  boxShadow:
+                    selectedMenu === "stdtimeReport"
+                      ? "0 4px 16px rgba(25,118,210,0.13)"
+                      : "none",
+                  background:
+                    selectedMenu === "stdtimeReport"
+                      ? "linear-gradient(90deg,#bbdefb 0%,#e3f2fd 100%)"
+                      : "transparent",
+                  color: "#1976d2",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  overflow: "hidden",
+                  transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                  width: "100%",
                   maxWidth: 220,
-                  '&:hover': {
-                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                  "&:hover": {
+                    background: "linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)",
+                    boxShadow: "0 2px 12px 0 rgba(33,150,243,0.10)",
                     maxWidth: 340,
+                    color: "#0d47a1"
                   },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/StandardTimeReportByProduct.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                <ListItemIcon
+                  sx={{
+                    minWidth: 38,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    filter: selectedMenu === "stdtimeReport" ? "drop-shadow(0 2px 8px #90caf9)" : "none",
+                  }}
+                >
+                  <img
+                    src="/StandardTimeReportByProduct.png"
+                    alt=""
+                    width={selectedMenu === "stdtimeReport" ? 30 : 30}
+                    style={{
+                      verticalAlign: "middle",
+                      borderRadius: selectedMenu === "stdtimeReport" ? "50%" : "0%",
+                      background: selectedMenu === "stdtimeReport" ? "#fff" : "transparent",
+                      boxShadow: selectedMenu === "stdtimeReport" ? "0 2px 8px #bbdefb" : "none",
+                      padding: selectedMenu === "stdtimeReport" ? "2px" : "0px",
+                      transition: "all 0.3s cubic-bezier(.4,0,.2,1)"
+                    }}
+                  />
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <Tooltip title="Standard Time Report By Product" placement="right" arrow enterDelay={300}>
-                      <span style={{
-                        fontSize: 16,
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: 'block',
-                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                      }}>
+                    <Tooltip
+                      title="Standard Time Report By Product"
+                      placement="right"
+                      arrow
+                      enterDelay={300}
+                    >
+                      <span
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "block",
+                          transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                          color: selectedMenu === "stdtimeReport" ? "#0d47a1" : "#1976d2",
+                          letterSpacing: 0.2,
+                          fontFamily: "Sarabun, sans-serif"
+                        }}
+                      >
                         Standard Time Report By Product
                       </span>
                     </Tooltip>
@@ -425,48 +515,86 @@ export default function Navbar() {
               <ListItemButton
                 selected={selectedMenu === "stdtimeGraphs"}
                 onClick={() => {
-                  setMenuName("Standard Time Various Types of Graphs");
+                  setMenuName("STANDARD TIME VARIOUS TYPES OF GRAPHS");
                   setSelectedMenu("stdtimeGraphs");
                 }}
                 component={Link}
                 to="/standard_time_various_types_of_graphs"
                 sx={{
-                  minHeight: 46,
-                  borderRadius: 2.5,
-                  px: 1.7,
-                  py: 1.2,
-                  boxShadow: selectedMenu === "stdtimeGraphs" ? '0 2px 12px rgba(25,118,210,0.10)' : 'none',
-                  background: selectedMenu === "stdtimeGraphs" ? 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)' : 'transparent',
-                  color: selectedMenu === "stdtimeGraphs" ? '#1976d2' : '#1976d2',
-                  fontWeight: 500,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  overflow: 'hidden',
-                  transition: 'width 0.3s cubic-bezier(.4,0,.2,1), background 0.2s',
-                  width: '100%',
+                  minHeight: 52,
+                  borderRadius: 3,
+                  px: 1.5,
+                  py: 1.5,
+                  boxShadow:
+                    selectedMenu === "stdtimeGraphs"
+                      ? "0 4px 16px rgba(25,118,210,0.13)"
+                      : "none",
+                  background:
+                    selectedMenu === "stdtimeGraphs"
+                      ? "linear-gradient(90deg,#bbdefb 0%,#e3f2fd 100%)"
+                      : "transparent",
+                  color: "#1976d2",
+                  fontWeight: 600,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 2,
+                  overflow: "hidden",
+                  transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                  width: "100%",
                   maxWidth: 220,
-                  '&:hover': {
-                    background: 'linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)',
+                  "&:hover": {
+                    background: "linear-gradient(90deg,#e3f2fd 0%,#bbdefb 100%)",
+                    boxShadow: "0 2px 12px 0 rgba(33,150,243,0.10)",
                     maxWidth: 340,
+                    color: "#0d47a1"
                   },
                 }}
               >
-                <ListItemIcon sx={{ minWidth: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img src="/Chart.png" alt="" width={26} style={{ verticalAlign: 'middle' }} />
+                <ListItemIcon
+                  sx={{
+                    minWidth: 38,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    filter: selectedMenu === "stdtimeGraphs" ? "drop-shadow(0 2px 8px #90caf9)" : "none",
+                  }}
+                >
+                  <img
+                    src="/Chart.png"
+                    alt=""
+                    width={selectedMenu === "stdtimeGraphs" ? 30 : 30}
+                    style={{
+                      verticalAlign: "middle",
+                      borderRadius: selectedMenu === "stdtimeGraphs" ? "50%" : "0%",
+                      background: selectedMenu === "stdtimeGraphs" ? "#fff" : "transparent",
+                      boxShadow: selectedMenu === "stdtimeGraphs" ? "0 2px 8px #bbdefb" : "none",
+                      padding: selectedMenu === "stdtimeGraphs" ? "2px" : "0px",
+                      transition: "all 0.3s cubic-bezier(.4,0,.2,1)"
+                    }}
+                  />
                 </ListItemIcon>
                 <ListItemText
                   primary={
-                    <Tooltip title="Standard Time Various Graphs" placement="right" arrow enterDelay={300}>
-                      <span style={{
-                        fontSize: 16,
-                        fontWeight: 500,
-                        whiteSpace: 'nowrap',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        display: 'block',
-                        transition: 'all 0.3s cubic-bezier(.4,0,.2,1)',
-                      }}>
+                    <Tooltip
+                      title="Standard Time Various Graphs"
+                      placement="right"
+                      arrow
+                      enterDelay={300}
+                    >
+                      <span
+                        style={{
+                          fontSize: 17,
+                          fontWeight: 600,
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          display: "block",
+                          transition: "all 0.3s cubic-bezier(.4,0,.2,1)",
+                          color: selectedMenu === "stdtimeGraphs" ? "#0d47a1" : "#1976d2",
+                          letterSpacing: 0.2,
+                          fontFamily: "Sarabun, sans-serif"
+                        }}
+                      >
                         Standard Time Various Graphs
                       </span>
                     </Tooltip>
@@ -476,37 +604,67 @@ export default function Navbar() {
               </ListItemButton>
             </ListItem>
           </List>
-          <Box sx={{ position: 'absolute', bottom: 0, left: 0, width: '100%', py: 2, px: 2, textAlign: 'center', bgcolor: 'transparent' }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-              <Divider sx={{ width: '100%', mb: 1, borderColor: '#bfbcbcff', borderBottomWidth: 0.5, opacity: 1.80 }} />
-              <img src={Fuji} alt="Fuji Logo" style={{ width: 60, marginBottom: 10 }} />
+          <Box
+            sx={{
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              width: "100%",
+              py: 2,
+              px: 2,
+              textAlign: "center",
+              bgcolor: "transparent",
+            }}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                width: "100%",
+              }}
+            >
+              <Divider
+                sx={{
+                  width: "100%",
+                  mb: 1,
+                  borderColor: "#bfbcbcff",
+                  borderBottomWidth: 0.5,
+                  opacity: 1.8,
+                }}
+              />
+              <img
+                src={Fuji}
+                alt="Fuji Logo"
+                style={{ width: 60, marginBottom: 10 }}
+              />
               <Box
                 sx={{
                   height: showBrandText ? 32 : 0,
-                  overflow: 'hidden',
-                  transition: 'height 0.8s cubic-bezier(.25,0,.25,1)',
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  overflow: "hidden",
+                  transition: "height 0.8s cubic-bezier(.25,0,.25,1)",
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
                 <Typography
                   variant="caption"
                   sx={{
-                    color: 'rgba(0, 0, 0, 0.8)',
+                    color: "rgba(0, 0, 0, 0.8)",
                     fontWeight: 500,
                     fontSize: 13,
                     letterSpacing: 0.2,
-                    whiteSpace: 'normal',
-                    wordBreak: 'break-word',
-                    overflowWrap: 'break-word',
+                    whiteSpace: "normal",
+                    wordBreak: "break-word",
+                    overflowWrap: "break-word",
                     maxWidth: 180,
-                    margin: '0 auto',
-                    display: 'block',
-                    textAlign: 'center',
+                    margin: "0 auto",
+                    display: "block",
+                    textAlign: "center",
                     opacity: showBrandText ? 1 : 0,
-                    transition: 'opacity 0.8s cubic-bezier(.25,0,.25,1)',
+                    transition: "opacity 0.8s cubic-bezier(.25,0,.25,1)",
                   }}
                 >
                   Fujikura Electronic Components (Thailand) Ltd.
@@ -514,7 +672,6 @@ export default function Navbar() {
               </Box>
             </Box>
           </Box>
-
         </Drawer>
       </Box>
     </>
