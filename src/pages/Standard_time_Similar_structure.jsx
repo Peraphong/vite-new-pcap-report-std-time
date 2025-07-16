@@ -56,6 +56,8 @@ export default function StandardTimeSimilarStructure() {
   const [loadingPercent, setLoadingPercent] = useState(0);
   const [loadingLoaded, setLoadingLoaded] = useState(0);
   const [loadingSandToData, setLoadingSandToData] = useState(false);
+  // State สำหรับ disable ปุ่ม sand table data
+  const [sandButtonDisabled, setSandButtonDisabled] = useState(false);
   // Ref for canceling Sand to Data loading
   const sandToDataCancelRef = useRef(false);
   // -------------------- State --------------------
@@ -227,6 +229,8 @@ export default function StandardTimeSimilarStructure() {
 
   // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
   const handleSendTableData = async () => {
+    // Disable ปุ่มทันทีที่เริ่ม process
+    setSandButtonDisabled(true);
     // Check if user selected all product and all process
     const isAllProduct = !selectedProduct || selectedProduct === 'All Product' || selectedProduct.prd_name === 'All Product';
     const isAllProcess = !selectedProcess || selectedProcess === 'All Process' || selectedProcess.proc_disp === 'All Process';
@@ -253,20 +257,38 @@ export default function StandardTimeSimilarStructure() {
       update_by: userEmpID || update_by || '',
       remark: row.remark || row.similar_type || '',
     }));
-    // Duplicate check first
+    // Duplicate check: ถ้าซ้ำ 3 ตัว prd_item, proc_id, secpcs ไม่ต้องทำอะไร
+    // ถ้าซ้ำ prd_item/proc_id แต่ secpcs ไม่ตรง ให้ update secpcs/remark
+    // ถ้าไม่ซ้ำเลยให้ insert ใหม่
     let duplicateCount = 0;
     let duplicateList = [];
     let uniqueRecords = [];
+    let updateCount = 0;
     for (const record of logData) {
-      const { prd_item, proc_id, secpcs } = record;
-      const filterUrl = `http://10.17.100.115:3001/api/smart_pcap/filter-count-std-time-fix?prd_item=${prd_item}&proc_id=${proc_id}&secpcs=${secpcs}`;
+      const { prd_item, proc_id, secpcs, remark } = record;
+      const filterUrlPair = `http://10.17.100.115:3001/api/smart_pcap/filter-count-std-time-fix?prd_item=${prd_item}&proc_id=${proc_id}`;
       try {
-        const res = await fetch(filterUrl);
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
+        const response = await axios.get(filterUrlPair);
+        const data = response.data;
+        if (data && data.length > 0 && data[0]) {
+          const stdtimeSecpcs = data[0].stdtime_secpcs;
+          console.log('Check:', { prd_item, proc_id, secpcs, stdtimeSecpcs });
+          if (secpcs !== stdtimeSecpcs) {
+            // secpcs ไม่ตรง ให้ update
+            try {
+              await axios.get(`http://10.17.100.115:3001/api/smart_pcap/update-sec-pcs-remark-std-fix?secpcs=${secpcs}&remark=${remark}&prd_item=${prd_item}&proc_id=${proc_id}`);
+              console.log('Updated record:', { prd_item, proc_id, secpcs, remark });
+              updateCount++;
+            } catch (error) {
+              console.error('Error updating secpcs:', error);
+            }
+          }
+          // ไม่ต้อง insert ใหม่ ไม่ว่า secpcs จะตรงหรือไม่
           duplicateCount++;
           duplicateList.push(`${prd_item}, ${proc_id}, ${secpcs}`);
+          continue;
         } else {
+          // ไม่ซ้ำเลย ให้ insert ใหม่
           uniqueRecords.push(record);
         }
       } catch (error) {
@@ -293,6 +315,7 @@ export default function StandardTimeSimilarStructure() {
               ${displayList.map(item => `<div style='font-size:15px;color:#e53935;padding:2px 0;'>${item}</div>`).join('')}
               ${truncated ? `<div style='font-size:15px;color:#e53935;padding:2px 0;'>...</div>` : ''}
             </div>
+            <div style='font-size:16px;color:#333;margin-bottom:8px;'>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>
             <div style='font-size:16px;color:#333;margin-bottom:0;'>Do you want to continue and insert only non-duplicate records?</div>
           </div>
         `,
@@ -343,11 +366,13 @@ export default function StandardTimeSimilarStructure() {
         await Swal.fire({
           icon: 'success',
           title: 'Insert Completed',
-          text: `Successfully sent ${uniqueRecords.length.toLocaleString()} records.\nDuplicate records were not inserted.`,
+          html: `<div style='font-size:18px;'>Successfully sent <b>${uniqueRecords.length.toLocaleString()}</b> records.<br>Duplicate records were not inserted.<br>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>`,
           confirmButtonColor: '#1976d2'
         });
         setLoadingPercent(0);
         setLoadingLoaded(0);
+        // Enable ปุ่มหลัง process เสร็จ
+        setSandButtonDisabled(false);
       } else {
         // Cancelled
         await Swal.fire({
@@ -356,6 +381,7 @@ export default function StandardTimeSimilarStructure() {
           text: 'No data was inserted.',
           confirmButtonColor: '#1976d2'
         });
+        setSandButtonDisabled(false);
       }
     } else {
       // No duplicates, insert all
@@ -382,11 +408,12 @@ export default function StandardTimeSimilarStructure() {
       await Swal.fire({
         icon: 'success',
         title: 'Insert Completed',
-        text: `Successfully sent ${logData.length.toLocaleString()} records.`,
+        html: `<div style='font-size:18px;'>Successfully sent <b>${logData.length.toLocaleString()}</b> records.<br>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>`,
         confirmButtonColor: '#1976d2'
       });
       setLoadingPercent(0);
       setLoadingLoaded(0);
+      setSandButtonDisabled(false);
     }
   };
   // Modern, beautiful background for the whole page
@@ -705,6 +732,8 @@ export default function StandardTimeSimilarStructure() {
   };
 
   // -------------------- Render --------------------
+  // ตัวอย่างการใช้งานปุ่ม sand table data:
+  // <button onClick={handleSendTableData} disabled={sandButtonDisabled}>Sand Table Data</button>
   // Pagination Controls UI
   const PaginationControls = (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', margin: '18px 0 8px 0', fontSize: '16px', fontWeight: 500 }}>
@@ -1364,7 +1393,7 @@ export default function StandardTimeSimilarStructure() {
               min-width: 1200px;
               background: transparent;
               margin: 0 auto;
-              border-radius: 12px;
+              border-radius: 0 !important;
               overflow: visible;
               font-family: 'Segoe UI', 'Poppins', sans-serif;
               box-shadow: none;
@@ -1377,6 +1406,7 @@ export default function StandardTimeSimilarStructure() {
               white-space: nowrap;
               background-clip: padding-box;
               transition: background 0.18s, box-shadow 0.18s;
+              border-radius: 0 !important;
             }
             .beautiful-table th {
               background: #1976d2;
