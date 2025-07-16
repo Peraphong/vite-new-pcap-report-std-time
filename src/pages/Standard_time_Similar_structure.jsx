@@ -104,15 +104,50 @@ export default function StandardTimeSimilarStructure() {
   // --- Export progress bar: sync with real progress, use Swal for all notifications ---
   const [progressPercent, setProgressPercent] = useState(0);
   const [progressLoaded, setProgressLoaded] = useState(0);
-  const progressTimer = useRef(null);
+  // สำหรับ animation progress bar แบบ chunk
+  const [progressTarget, setProgressTarget] = useState(0); // เป้าหมาย %
+  const [progressAnimDuration, setProgressAnimDuration] = useState(0); // ms
+  const progressAnimStart = useRef(Date.now());
+  const progressAnimFrom = useRef(0);
+  const progressAnimTimer = useRef(null);
 
   // -------------------- Effect --------------------
-  // Sync progress bar to real download progress instantly for real-time feel
+
+  // Animate progress bar: วิ่งจากค่าเดิมไปเป้าหมายใหม่ในเวลาที่กำหนด
   useEffect(() => {
-    if (exporting) {
-      setProgressPercent(exportProgress.percent);
+    if (!exporting) {
+      setProgressPercent(0);
+      setProgressTarget(0);
+      setProgressAnimDuration(0);
+      if (progressAnimTimer.current) clearInterval(progressAnimTimer.current);
+      return;
     }
-  }, [exporting, exportProgress.percent]);
+    if (progressPercent === progressTarget) return;
+    if (progressAnimDuration <= 0) {
+      setProgressPercent(progressTarget);
+      return;
+    }
+    if (progressAnimTimer.current) clearInterval(progressAnimTimer.current);
+    const start = Date.now();
+    const from = progressPercent;
+    const to = progressTarget;
+    const duration = progressAnimDuration;
+    progressAnimStart.current = start;
+    progressAnimFrom.current = from;
+    progressAnimTimer.current = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - start;
+      if (elapsed >= duration) {
+        setProgressPercent(to);
+        clearInterval(progressAnimTimer.current);
+        return;
+      }
+      const percent = from + (to - from) * (elapsed / duration);
+      setProgressPercent(percent);
+    }, 16);
+    return () => { if (progressAnimTimer.current) clearInterval(progressAnimTimer.current); };
+    // eslint-disable-next-line
+  }, [progressTarget, progressAnimDuration, exporting]);
 
   useEffect(() => {
     let cancel;
@@ -163,30 +198,31 @@ export default function StandardTimeSimilarStructure() {
   }, [processInput, selectedProduct]);
 
   // Progress bar: animate smoothly but always catch up to real percent, and only reach 100% when done
+
+  // เมื่อ exportProgress เปลี่ยน (เช่น โหลด chunk ใหม่) ให้ set progressTarget และ duration
+  const lastChunkTime = useRef(Date.now());
   useEffect(() => {
-    if (exporting) {
-      // Only reset to 0% if this is a new export (loaded = 0)
-      if (exportProgress.loaded === 0) setProgressPercent(0);
-      if (progressTimer.current) clearInterval(progressTimer.current);
-      progressTimer.current = setInterval(() => {
-        setProgressPercent(prev => {
-          if (exportProgress.done) return 100;
-          if (prev < exportProgress.percent) {
-            // Interpolate with small step for ultra-smooth progress
-            const step = Math.max(0.25, (exportProgress.percent - prev) / 12);
-            return Math.min(exportProgress.percent, prev + step);
-          }
-          // If stuck, nudge forward very slowly but never reach 100 until done
-          if (prev < 99.5) return prev + 0.15;
-          return prev;
-        });
-      }, 18); // Faster interval for smoothest animation
-    } else {
-      setProgressPercent(0);
-      if (progressTimer.current) clearInterval(progressTimer.current);
+    if (!exporting) return;
+    // อย่า animate ถ้าเสร็จแล้ว
+    if (exportProgress.done) {
+      setProgressTarget(100);
+      setProgressAnimDuration(400);
+      setProgressLoaded(exportProgress.loaded);
+      return;
     }
-    return () => { if (progressTimer.current) clearInterval(progressTimer.current); };
-  }, [exporting, exportProgress]);
+    // คำนวณ % เป้าหมายใหม่
+    const percent = exportProgress.total > 0 ? (exportProgress.loaded / exportProgress.total) * 100 : 0;
+    // คำนวณเวลาที่ใช้โหลด chunk นี้จริง (ms)
+    const now = Date.now();
+    let duration = now - lastChunkTime.current;
+    // จำกัด min/max duration เพื่อความ smooth
+    if (duration < 300) duration = 300;
+    if (duration > 2000) duration = 2000;
+    setProgressTarget(percent);
+    setProgressAnimDuration(duration);
+    setProgressLoaded(exportProgress.loaded);
+    lastChunkTime.current = now;
+  }, [exportProgress.loaded, exportProgress.total, exportProgress.done, exporting]);
 
 
   // ฟังก์ชัน MOCK สำหรับส่งข้อมูลทั้งหมดไปยัง API (ยังไม่เชื่อมต่อ API จริง)
@@ -196,116 +232,159 @@ export default function StandardTimeSimilarStructure() {
     const isAllProcess = !selectedProcess || selectedProcess === 'All Process' || selectedProcess.proc_disp === 'All Process';
     // Check if tableData is empty or total is 0
     if (!total || total === 0) {
-      await Swal.fire({
-        icon: 'warning',
-        title: 'No Data',
-        text: 'Please select table data before updating.',
-        confirmButtonColor: '#1976d2'
+      setDialog({
+        open: true,
+        message: 'Please select table data before updating.',
+        severity: 'warning',
       });
       return;
     }
-    let swalText = `Do you want to update all data (${total.toLocaleString()} records) to the system?`;
+    let dialogText = `Do you want to update all data (${total.toLocaleString()} records) to the system?`;
     if (isAllProduct && isAllProcess) {
-      swalText += '\n\nWarning: You are about to update all products and all processes. This may cause the browser to freeze due to the large amount of data. Please wait until the upload is complete and do not refresh the page.';
+      dialogText += '\n\nWarning: You are about to update all products and all processes. This may cause the browser to freeze due to the large amount of data. Please wait until the upload is complete and do not refresh the page.';
     }
-    const result = await Swal.fire({
-      title: 'Confirm Update?',
-      text: swalText,
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Yes',
-      cancelButtonText: 'Cancel',
-      confirmButtonColor: '#1976d2',
-      cancelButtonColor: '#e539ช35',
-      reverseButtons: true
-    });
-    if (result.isConfirmed) {
+    // Confirm with Dialog (not Swal)
+    // Prepare data for API ให้ตรงกับ backend (ใช้ tableData จริง)
+    const logData = tableData.map(row => ({
+      prd_item: row.prd_item || row.item || '',
+      proc_id: row.proc_id || '',
+      secpcs: row.sec_pcs ?? row.stdtime_secpcs ?? row.sec_per_pcs ?? '',
+      create_by: userEmpID || update_by || '',
+      update_by: userEmpID || update_by || '',
+      remark: row.remark || row.similar_type || '',
+    }));
+    // Duplicate check first
+    let duplicateCount = 0;
+    let duplicateList = [];
+    let uniqueRecords = [];
+    for (const record of logData) {
+      const { prd_item, proc_id, secpcs } = record;
+      const filterUrl = `http://10.17.100.115:3001/api/smart_pcap/filter-count-std-time-fix?prd_item=${prd_item}&proc_id=${proc_id}&secpcs=${secpcs}`;
+      try {
+        const res = await fetch(filterUrl);
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          duplicateCount++;
+          duplicateList.push(`${prd_item}, ${proc_id}, ${secpcs}`);
+        } else {
+          uniqueRecords.push(record);
+        }
+      } catch (error) {
+        console.error('Error filtering record:', error);
+      }
+    }
+    // Show Swal for duplicate check
+    if (duplicateCount > 0) {
+      // Truncate duplicate list if more than 4
+      let displayList = duplicateList;
+      let truncated = false;
+      if (duplicateList.length > 4) {
+        displayList = duplicateList.slice(0, 4);
+        truncated = true;
+      }
+      const result = await Swal.fire({
+        icon: 'warning',
+        title: `<div style='font-size:28px;font-weight:700;color:#333;'>Duplicate Data Found</div>`,
+        html: `
+          <div style='text-align:left;padding:8px 0 0 0;'>
+            <div style='font-size:18px;color:#1976d2;font-weight:600;margin-bottom:10px;'>Found <b>${duplicateCount}</b> duplicate records.</div>
+            <div style='font-size:16px;color:#333;margin-bottom:8px;'><b>Duplicate List:</b></div>
+            <div style='max-height:120px;overflow:auto;background:#fafdff;border-radius:8px;border:1px solid #e3f0ff;padding:8px 12px;margin-bottom:18px;'>
+              ${displayList.map(item => `<div style='font-size:15px;color:#e53935;padding:2px 0;'>${item}</div>`).join('')}
+              ${truncated ? `<div style='font-size:15px;color:#e53935;padding:2px 0;'>...</div>` : ''}
+            </div>
+            <div style='font-size:16px;color:#333;margin-bottom:0;'>Do you want to continue and insert only non-duplicate records?</div>
+          </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: '<span style="font-size:18px;font-weight:600;padding:4px 18px;">Continue</span>',
+        cancelButtonText: '<span style="font-size:16px;font-weight:500;padding:4px 18px;">Cancel</span>',
+        focusCancel: true,
+        customClass: {
+          popup: 'swal2-dialog',
+          title: 'swal2-title',
+          htmlContainer: 'swal2-html-container',
+          confirmButton: 'swal2-confirm',
+          cancelButton: 'swal2-cancel'
+        },
+        background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
+        width: 480,
+        padding: '32px 18px 24px 18px',
+        buttonsStyling: false,
+        showClass: {
+          popup: 'swal2-show'
+        },
+        hideClass: {
+          popup: 'swal2-hide'
+        }
+      });
+      if (result.isConfirmed) {
+        // Continue: insert only non-duplicate records
+        sandToDataCancelRef.current = false;
+        setLoadingSandToData(true);
+        setLoadingPercent(0);
+        setLoadingLoaded(0);
+        for (let i = 0; i < uniqueRecords.length; i++) {
+          if (sandToDataCancelRef.current) break;
+          try {
+            await axios.get(
+              'http://10.17.100.115:3001/api/smart_pcap/insert-std-time-product-fix',
+              {
+                params: uniqueRecords[i]
+              }
+            );
+          } catch (error) {
+            console.error('Error inserting record:', error);
+          }
+          setLoadingLoaded(i + 1);
+          setLoadingPercent(Math.round(((i + 1) / uniqueRecords.length) * 100));
+        }
+        setLoadingSandToData(false);
+        await Swal.fire({
+          icon: 'success',
+          title: 'Insert Completed',
+          text: `Successfully sent ${uniqueRecords.length.toLocaleString()} records.\nDuplicate records were not inserted.`,
+          confirmButtonColor: '#1976d2'
+        });
+        setLoadingPercent(0);
+        setLoadingLoaded(0);
+      } else {
+        // Cancelled
+        await Swal.fire({
+          icon: 'info',
+          title: 'Insert Cancelled',
+          text: 'No data was inserted.',
+          confirmButtonColor: '#1976d2'
+        });
+      }
+    } else {
+      // No duplicates, insert all
       sandToDataCancelRef.current = false;
       setLoadingSandToData(true);
       setLoadingPercent(0);
       setLoadingLoaded(0);
-      // Fetch all rows of selected product/process
-      let allData = [];
-      let pageIdx = 1;
-      const pageSizeFetch = 10000;
-      let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
-      let paramsBase = {};
-      if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
-        paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
-      } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
-        paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp };
-      } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
-        paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS' };
-      } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
-        paramsBase = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
-      }
-      let totalRows = total;
-      // Fetch first page to get total count if API provides total
-      try {
-        const res = await axios.get(url, { params: { ...paramsBase, page: 1, pageSize: 1 } });
-        if (res.data && typeof res.data.total === 'number') {
-          totalRows = res.data.total;
-        } else if (Array.isArray(res.data.rows)) {
-          totalRows = res.data.rows.length;
-        } else if (Array.isArray(res.data)) {
-          totalRows = res.data.length;
-        }
-      } catch {}
-      // Fetch all pages
-      while (allData.length < totalRows) {
-        // Check for cancel before each fetch
-        if (sandToDataCancelRef.current) {
-          break;
-        }
+      for (let i = 0; i < logData.length; i++) {
+        if (sandToDataCancelRef.current) break;
         try {
-          const res = await axios.get(url, { params: { ...paramsBase, page: pageIdx, pageSize: pageSizeFetch } });
-          let rows = [];
-          if (res.data && Array.isArray(res.data.rows)) {
-            rows = res.data.rows;
-          } else if (Array.isArray(res.data) && res.data.length > 0) {
-            rows = res.data;
-          }
-          if (!rows || rows.length === 0) break;
-          allData = allData.concat(rows);
-          // Update progress
-          let percent = Math.floor((allData.length / totalRows) * 100);
-          if (allData.length < totalRows) {
-            percent = Math.min(percent, 99);
-          } else {
-            percent = 100;
-          }
-          setLoadingPercent(percent);
-          setLoadingLoaded(allData.length);
-          if (rows.length < pageSizeFetch) break;
-          pageIdx++;
-        } catch (err) {
-          break;
+          await axios.get(
+            'http://10.17.100.115:3001/api/smart_pcap/insert-std-time-product-fix',
+            {
+              params: logData[i]
+            }
+          );
+        } catch (error) {
+          console.error('Error inserting record:', error);
         }
-      }
-      // Only send/log data if NOT canceled
-      if (!sandToDataCancelRef.current) {
-        // LOG only the required fields (English)
-        const logData = allData.map(row => ({
-          prd_item: row.prd_item || row.item || '',
-          proc_id: row.proc_id || '',
-          sec_pcs: row.sec_pcs ?? row.sec_per_pcs ?? '',
-          create_by: row.create_by || '',
-          update_by: row.update_by || '',
-          similar_type: row.similar_type || row.remark || '',
-        }));
-        logData.forEach((item, idx) => {
-          console.log(`Record ${idx + 1}:`);
-          Object.entries(item).forEach(([key, value]) => {
-            console.log(`  ${key}: ${value}`);
-          });
-        });
-        setDialog({
-          open: true,
-          message: `Preparing to send ${logData.length.toLocaleString()} records (mock only, not connected to real API)`,
-          severity: "info",
-        });
+        setLoadingLoaded(i + 1);
+        setLoadingPercent(Math.round(((i + 1) / logData.length) * 100));
       }
       setLoadingSandToData(false);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Insert Completed',
+        text: `Successfully sent ${logData.length.toLocaleString()} records.`,
+        confirmButtonColor: '#1976d2'
+      });
       setLoadingPercent(0);
       setLoadingLoaded(0);
     }
@@ -384,6 +463,7 @@ export default function StandardTimeSimilarStructure() {
           process: row.proc_disp || row.process || params.proc_disp || "",
           product: row.prd_name || row.product || params.prd_name || "",
           item: row.prd_item || row.item || "",
+          proc_id: row.proc_id || '',
           sec_per_pcs: row.sec_pcs ?? row.sec_per_pcs ?? "",
           remark: row.similar_type || row.remark || "",
         })));
@@ -395,6 +475,7 @@ export default function StandardTimeSimilarStructure() {
           process: row.proc_disp || row.process || params.proc_disp || "",
           product: row.prd_name || row.product || params.prd_name || "",
           item: row.prd_item || row.item || "",
+          proc_id: row.proc_id || '',
           sec_per_pcs: row.sec_pcs ?? row.sec_per_pcs ?? "",
           remark: row.similar_type || row.remark || "",
         })));
@@ -1463,13 +1544,40 @@ export default function StandardTimeSimilarStructure() {
           <div style={{ fontSize: 24, fontWeight: 600, marginBottom: 18, color: '#1976d2' }}>
             {dialog.message}
           </div>
-          <Button
-            variant="contained"
-            onClick={handleCloseDialog}
-            style={{ minWidth: 90, fontWeight: 600, fontSize: 18, borderRadius: 8 }}
-          >
-            OK
-          </Button>
+          {dialog.severity === 'question' && dialog.onConfirm ? (
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 18 }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={async () => {
+                  handleCloseDialog();
+                  if (typeof dialog.onConfirm === 'function') await dialog.onConfirm();
+                }}
+                style={{ minWidth: 90, fontWeight: 600, fontSize: 18, borderRadius: 8 }}
+              >
+                {dialog.confirmLabel || 'Yes'}
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => {
+                  handleCloseDialog();
+                  if (typeof dialog.onCancel === 'function') dialog.onCancel();
+                }}
+                style={{ minWidth: 90, fontWeight: 600, fontSize: 18, borderRadius: 8 }}
+              >
+                {dialog.cancelLabel || 'Cancel'}
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="contained"
+              onClick={handleCloseDialog}
+              style={{ minWidth: 90, fontWeight: 600, fontSize: 18, borderRadius: 8 }}
+            >
+              OK
+            </Button>
+          )}
         </DialogContent>
       </Dialog>
 

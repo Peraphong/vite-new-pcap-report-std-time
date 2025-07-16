@@ -1058,19 +1058,14 @@ export default function StandardTimeReportByProduct() {
                         fontSize: 28,
                         fontWeight: 700,
                         padding: '48px 0',
-                        background: 'linear-gradient(90deg, #e3f2fd 0%, #fff 100%)',
-                        borderRadius: '18px',
+                        background: '#fff',
+                        borderRadius: 0,
                         letterSpacing: '1.2px',
-                        boxShadow: '0 2px 12px 0 rgba(33,150,243,0.08)',
+                        boxShadow: 'none',
                         position: 'relative',
                       }}>
                         <div style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',gap:12}}>
-                          {/* <svg width="64" height="64" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg" style={{marginBottom:8}}>
-                            <circle cx="24" cy="24" r="20" fill="#e3f2fd" stroke="#1976d2" strokeWidth="3" />
-                            <path d="M16 24h16M24 16v16" stroke="#1976d2" strokeWidth="3" strokeLinecap="round" />
-                          </svg> */}
-                          <span style={{fontSize: '2rem', fontWeight: 800, color: '#0f0f0f76', textShadow: '0 2px 8px #b3c6f7'}}>NO DATA FOUND</span>
-                          {/* <span style={{fontSize: '1.15rem', color: '#888', fontWeight: 500, marginTop: 2}}>ไม่พบข้อมูลที่ตรงกับเงื่อนไขที่เลือก</span> */}
+                          <span style={{fontSize: '2rem', fontWeight: 800, color: '#0f0f0f76', textShadow: '0 2px 8px #ffffff'}}>NO DATA FOUND</span>
                         </div>
                       </td>
                     </tr>
