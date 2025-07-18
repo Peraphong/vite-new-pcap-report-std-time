@@ -236,102 +236,19 @@ export default function StandardTimeSimilarStructure() {
     const isAllProcess = !selectedProcess || selectedProcess === 'All Process' || selectedProcess.proc_disp === 'All Process';
     // Check if tableData is empty or total is 0
     if (!total || total === 0) {
-      setDialog({
-        open: true,
-        message: 'Please select table data before updating.',
-        severity: 'warning',
-      });
-      return;
-    }
-    let dialogText = `Do you want to update all data (${total.toLocaleString()} records) to the system?`;
-    if (isAllProduct && isAllProcess) {
-      dialogText += '\n\nWarning: You are about to update all products and all processes. This may cause the browser to freeze due to the large amount of data. Please wait until the upload is complete and do not refresh the page.';
-    }
-    // Confirm with Dialog (not Swal)
-    // Prepare data for API ให้ตรงกับ backend (ใช้ tableData จริง)
-    const logData = tableData.map(row => ({
-      prd_item: row.prd_item || row.item || '',
-      proc_id: row.proc_id || '',
-      secpcs: row.sec_pcs ?? row.stdtime_secpcs ?? row.sec_per_pcs ?? '',
-      create_by: userEmpID || update_by || '',
-      update_by: userEmpID || update_by || '',
-      remark: row.remark || row.similar_type || '',
-    }));
-    // Duplicate check: ถ้าซ้ำ 3 ตัว prd_item, proc_id, secpcs ไม่ต้องทำอะไร
-    // ถ้าซ้ำ prd_item/proc_id แต่ secpcs ไม่ตรง ให้ update secpcs/remark
-    // ถ้าไม่ซ้ำเลยให้ insert ใหม่
-    let duplicateCount = 0;
-    let duplicateList = [];
-    let uniqueRecords = [];
-    let updateCount = 0;
-    for (const record of logData) {
-      const { prd_item, proc_id, secpcs, remark } = record;
-      const filterUrlPair = `http://10.17.100.115:3001/api/smart_pcap/filter-count-std-time-fix?prd_item=${prd_item}&proc_id=${proc_id}`;
-      try {
-        const response = await axios.get(filterUrlPair);
-        const data = response.data;
-        if (data && data.length > 0 && data[0]) {
-          const stdtimeSecpcs = data[0].stdtime_secpcs;
-          console.log('Check:', { prd_item, proc_id, secpcs, stdtimeSecpcs });
-          if (secpcs !== stdtimeSecpcs) {
-            // secpcs ไม่ตรง ให้ update
-            try {
-              await axios.get(`http://10.17.100.115:3001/api/smart_pcap/update-sec-pcs-remark-std-fix?secpcs=${secpcs}&remark=${remark}&prd_item=${prd_item}&proc_id=${proc_id}`);
-              console.log('Updated record:', { prd_item, proc_id, secpcs, remark });
-              updateCount++;
-            } catch (error) {
-              console.error('Error updating secpcs:', error);
-            }
-          }
-          // ไม่ต้อง insert ใหม่ ไม่ว่า secpcs จะตรงหรือไม่
-          duplicateCount++;
-          duplicateList.push(`${prd_item}, ${proc_id}, ${secpcs}`);
-          continue;
-        } else {
-          // ไม่ซ้ำเลย ให้ insert ใหม่
-          uniqueRecords.push(record);
-        }
-      } catch (error) {
-        console.error('Error filtering record:', error);
-      }
-    }
-    // Show Swal for duplicate check
-    if (duplicateCount > 0) {
-      // Truncate duplicate list if more than 4
-      let displayList = duplicateList;
-      let truncated = false;
-      if (duplicateList.length > 4) {
-        displayList = duplicateList.slice(0, 4);
-        truncated = true;
-      }
-      const result = await Swal.fire({
-        icon: 'warning',
-        title: `<div style='font-size:28px;font-weight:700;color:#333;'>Duplicate Data Found</div>`,
-        html: `
-          <div style='text-align:left;padding:8px 0 0 0;'>
-            <div style='font-size:18px;color:#1976d2;font-weight:600;margin-bottom:10px;'>Found <b>${duplicateCount}</b> duplicate records.</div>
-            <div style='font-size:16px;color:#333;margin-bottom:8px;'><b>Duplicate List:</b></div>
-            <div style='max-height:120px;overflow:auto;background:#fafdff;border-radius:8px;border:1px solid #e3f0ff;padding:8px 12px;margin-bottom:18px;'>
-              ${displayList.map(item => `<div style='font-size:15px;color:#e53935;padding:2px 0;'>${item}</div>`).join('')}
-              ${truncated ? `<div style='font-size:15px;color:#e53935;padding:2px 0;'>...</div>` : ''}
-            </div>
-            <div style='font-size:16px;color:#333;margin-bottom:8px;'>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>
-            <div style='font-size:16px;color:#333;margin-bottom:0;'>Do you want to continue and insert only non-duplicate records?</div>
-          </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: '<span style="font-size:18px;font-weight:600;padding:4px 18px;">Continue</span>',
-        cancelButtonText: '<span style="font-size:16px;font-weight:500;padding:4px 18px;">Cancel</span>',
-        focusCancel: true,
+      await Swal.fire({
+        icon: 'info',
+        title: '<div style="font-size:24px;font-weight:700;color:#1976d2;">Please select table data</div>',
+        html: `<div style='font-size:18px;color:#333;margin-top:8px;'>You must select at least one record before updating.</div>`,
+        confirmButtonText: '<span style="font-size:18px;font-weight:600;padding:4px 18px;">OK</span>',
         customClass: {
           popup: 'swal2-dialog',
           title: 'swal2-title',
           htmlContainer: 'swal2-html-container',
           confirmButton: 'swal2-confirm',
-          cancelButton: 'swal2-cancel'
         },
         background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
-        width: 480,
+        width: 420,
         padding: '32px 18px 24px 18px',
         buttonsStyling: false,
         showClass: {
@@ -341,81 +258,315 @@ export default function StandardTimeSimilarStructure() {
           popup: 'swal2-hide'
         }
       });
-      if (result.isConfirmed) {
-        // Continue: insert only non-duplicate records
-        sandToDataCancelRef.current = false;
-        setLoadingSandToData(true);
-        setLoadingPercent(0);
-        setLoadingLoaded(0);
-        for (let i = 0; i < uniqueRecords.length; i++) {
-          if (sandToDataCancelRef.current) break;
-          try {
-            await axios.get(
-              'http://10.17.100.115:3001/api/smart_pcap/insert-std-time-product-fix',
-              {
-                params: uniqueRecords[i]
-              }
-            );
-          } catch (error) {
-            console.error('Error inserting record:', error);
-          }
-          setLoadingLoaded(i + 1);
-          setLoadingPercent(Math.round(((i + 1) / uniqueRecords.length) * 100));
-        }
-        setLoadingSandToData(false);
-        await Swal.fire({
-          icon: 'success',
-          title: 'Insert Completed',
-          html: `<div style='font-size:18px;'>Successfully sent <b>${uniqueRecords.length.toLocaleString()}</b> records.<br>Duplicate records were not inserted.<br>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>`,
-          confirmButtonColor: '#1976d2'
-        });
-        setLoadingPercent(0);
-        setLoadingLoaded(0);
-        // Enable ปุ่มหลัง process เสร็จ
-        setSandButtonDisabled(false);
-      } else {
-        // Cancelled
-        await Swal.fire({
-          icon: 'info',
-          title: 'Insert Cancelled',
-          text: 'No data was inserted.',
-          confirmButtonColor: '#1976d2'
-        });
-        setSandButtonDisabled(false);
-      }
-    } else {
-      // No duplicates, insert all
-      sandToDataCancelRef.current = false;
-      setLoadingSandToData(true);
-      setLoadingPercent(0);
-      setLoadingLoaded(0);
-      for (let i = 0; i < logData.length; i++) {
-        if (sandToDataCancelRef.current) break;
-        try {
-          await axios.get(
-            'http://10.17.100.115:3001/api/smart_pcap/insert-std-time-product-fix',
-            {
-              params: logData[i]
-            }
-          );
-        } catch (error) {
-          console.error('Error inserting record:', error);
-        }
-        setLoadingLoaded(i + 1);
-        setLoadingPercent(Math.round(((i + 1) / logData.length) * 100));
-      }
-      setLoadingSandToData(false);
-      await Swal.fire({
-        icon: 'success',
-        title: 'Insert Completed',
-        html: `<div style='font-size:18px;'>Successfully sent <b>${logData.length.toLocaleString()}</b> records.<br>Updated <b style='color:#388e3c;'>${updateCount}</b> record(s).</div>`,
-        confirmButtonColor: '#1976d2'
-      });
-      setLoadingPercent(0);
-      setLoadingLoaded(0);
       setSandButtonDisabled(false);
+      return;
     }
+    // --- Immediate Swal with progress and Cancel only ---
+    let cancelled = false;
+    sandToDataCancelRef.current = false;
+    let progressText = '';
+    await Swal.fire({
+      title: '<div style="font-size:28px;font-weight:700;color:#1976d2;">Checking data<br>Please wait</div>',
+      html: `<div id="swal-progress-text" style='font-size:18px;color:#333;margin-top:8px;'>Preparing data</div>
+        <div style='margin:12px 0 0 0;'><img src="/public/data-cloud.gif" alt="Loading" style="width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 8px auto;" /></div>
+        <div style='margin-top:10px;'><button id="swal-cancel-btn" style="font-size:16px;padding:6px 24px;background:#e53935;color:#fff;border:none;border-radius:6px;cursor:pointer;">Cancel</button></div>`,
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      showConfirmButton: false,
+      background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
+      width: 420,
+      padding: '32px 18px 24px 18px',
+      customClass: {
+        popup: 'swal2-dialog',
+        title: 'swal2-title',
+        htmlContainer: 'swal2-html-container',
+      },
+      didOpen: async () => {
+        // Add cancel event
+        const cancelBtn = document.getElementById('swal-cancel-btn');
+        if (cancelBtn) {
+          cancelBtn.onclick = () => {
+            cancelled = true;
+            sandToDataCancelRef.current = true;
+            Swal.close();
+          };
+        }
+        // --- fetch all data ---
+        let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+        let params = {};
+        if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+          params = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
+        } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+          params = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp };
+        } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+          params = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS' };
+        } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+          params = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
+        }
+        // 1. ดึงจำนวนทั้งหมดก่อน
+        let totalRows = 0;
+        try {
+          const res = await axios.get(url, { params: { ...params, page: 1, pageSize: 1 } });
+          if (res.data && typeof res.data.total === 'number') {
+            totalRows = res.data.total;
+          } else if (Array.isArray(res.data.rows)) {
+            totalRows = res.data.rows.length;
+          } else if (Array.isArray(res.data)) {
+            totalRows = res.data.length;
+          }
+        } catch (err) {
+          document.getElementById('swal-progress-text').innerHTML = 'Cannot fetch all data from server.';
+          setTimeout(() => Swal.close(), 1200);
+          setSandButtonDisabled(false);
+          return;
+        }
+        if (!totalRows || totalRows === 0) {
+          document.getElementById('swal-progress-text').innerHTML = 'No data to process.';
+          setTimeout(() => Swal.close(), 1200);
+          setSandButtonDisabled(false);
+          return;
+        }
+        // 2. ดึงข้อมูลทุกหน้า (chunk) + update progress
+        let allRows = [];
+        const chunkSize = 20000;
+        let loadedCount = 0;
+        for (let pageIdx = 1; allRows.length < totalRows; pageIdx++) {
+          if (cancelled) break;
+          try {
+            const res = await axios.get(url, { params: { ...params, page: pageIdx, pageSize: chunkSize } });
+            let rows = [];
+            if (res.data && Array.isArray(res.data.rows)) {
+              rows = res.data.rows;
+            } else if (Array.isArray(res.data)) {
+              rows = res.data;
+            }
+            if (rows.length === 0) break;
+            allRows = allRows.concat(rows);
+            loadedCount = allRows.length;
+            // อัปเดต progress
+            const progressText = document.getElementById('swal-progress-text');
+            if (progressText) {
+              progressText.innerHTML = `Loading data... <b>${loadedCount.toLocaleString()}</b> / <b>${totalRows.toLocaleString()}</b> records`;
+            }
+          } catch (err) {
+            break;
+          }
+        }
+        if (cancelled) {
+          setSandButtonDisabled(false);
+          return;
+        }
+        // ปิด Swal loading หลังโหลดข้อมูลครบ
+        // Prepare data for API ให้ตรงกับ backend (ใช้ allRows จริง)
+        const logData = allRows.map(row => ({
+          prd_item: row.prd_item || row.item || '',
+          proc_id: row.proc_id || '',
+          secpcs: row.sec_pcs ?? row.stdtime_secpcs ?? row.sec_per_pcs ?? '',
+          create_by: userEmpID || update_by || '',
+          update_by: userEmpID || update_by || '',
+          remark: row.remark || row.similar_type || '',
+        }));
+
+        // --- Grouping/Unique by key (prd_item, proc_id) ---
+        const uniqueKeyMap = new Map();
+        logData.forEach((row, idx) => {
+          const key = `${row.prd_item}__${row.proc_id}`;
+          if (!uniqueKeyMap.has(key)) {
+            uniqueKeyMap.set(key, { ...row, _allIdx: [idx] });
+          } else {
+            uniqueKeyMap.get(key)._allIdx.push(idx);
+          }
+        });
+        const uniqueLogData = Array.from(uniqueKeyMap.values());
+
+        // --- Fast duplicate check: parallel batch + update Swal progress ---
+        const batchSizeCheck = 1000;
+        let checkResults = [];
+        let checkedCount = 0;
+        for (let i = 0; i < uniqueLogData.length; i += batchSizeCheck) {
+          if (cancelled) break;
+          const batch = uniqueLogData.slice(i, i + batchSizeCheck);
+          if (i === 0) {
+            window.__swalStartTime = Date.now();
+          }
+          let batchResults = new Array(batch.length);
+          let finished = 0;
+          // --- worker pool: limit concurrent requests ---
+          const maxConcurrent = 20;
+          let inFlight = 0;
+          let nextIdx = 0;
+          await new Promise((resolve) => {
+            function launchNext() {
+              if (cancelled) return resolve();
+              while (inFlight < maxConcurrent && nextIdx < batch.length) {
+                const j = nextIdx++;
+                inFlight++;
+                (async () => {
+                  if (cancelled) { inFlight--; return; }
+                  const record = batch[j];
+                  const { prd_item, proc_id, secpcs, remark } = record;
+                  let result;
+                  try {
+                    const filterUrlPair = `http://10.17.100.115:3005/api/smart_pcap_ora/filter-count-std-time-fix?prd_item=${prd_item}&proc_id=${proc_id}`;
+                    const response = await axios.get(filterUrlPair);
+                    const data = response.data;
+                    if (data && data.length > 0 && data[0]) {
+                      const stdtimeSecpcs = data[0].stdtime_secpcs;
+                      const stdtimeRemark = data[0].remark ?? data[0].similar_type ?? '';
+                      // Compare both secpcs and remark
+                      const isSecpcsDifferent = (isNaN(Number(secpcs)) || isNaN(Number(stdtimeSecpcs)))
+                        ? (secpcs !== stdtimeSecpcs)
+                        : (Math.abs(Number(secpcs) - Number(stdtimeSecpcs)) > 1e-8);
+                      const isRemarkDifferent = (remark ?? '') !== (stdtimeRemark ?? '');
+                      if (isSecpcsDifferent || isRemarkDifferent) {
+                        // Only update if either secpcs or remark is different
+                        axios.get(`http://10.17.100.115:3005/api/smart_pcap_ora/update-sec-pcs-remark-std-fix?secpcs=${secpcs}&remark=${remark}&prd_item=${prd_item}&proc_id=${proc_id}`);
+                      }
+                      result = { type: 'duplicate', prd_item, proc_id, secpcs };
+                    } else {
+                      result = { type: 'unique', record };
+                    }
+                  } catch (error) {
+                    result = { type: 'unique', record };
+                  }
+                  batchResults[j] = result;
+                  finished++;
+                  checkedCount = Math.min(i + finished, uniqueLogData.length);
+                  // อัปเดต progress พร้อมเวลา ทุกครั้งที่เช็คเสร็จ 1 ตัว (ขนาน)
+                  const progressText = document.getElementById('swal-progress-text');
+                  if (progressText) {
+                    const now = Date.now();
+                    const elapsed = window.__swalStartTime ? now - window.__swalStartTime : 0;
+                    const avgMsPerRecord = checkedCount > 0 ? elapsed / checkedCount : 0;
+                    const remaining = uniqueLogData.length - checkedCount;
+                    const estMsLeft = Math.round(avgMsPerRecord * remaining);
+                    const estMin = Math.floor(estMsLeft / 60000);
+                    const estSec = Math.floor((estMsLeft % 60000) / 1000);
+                    const estTimeStr = `${estMin}:${estSec.toString().padStart(2, '0')} min`;
+                    progressText.innerHTML = `
+                      <div style="text-align:center;">
+                        <span>Checking for duplicate records... </span>
+                        <span style="font-size:20px;font-weight:700;color:#1976d2;">
+                          <b>${checkedCount.toLocaleString()}</b>
+                        </span>
+                        <span style="font-size:20px;font-weight:700;color:#333;"> / </span>
+                        <span style="font-size:20px;font-weight:700;color:#1976d2;">
+                          <b>${uniqueLogData.length.toLocaleString()}</b>
+                        </span>
+                        <span style="font-size:16px;color:#333;"> records</span>
+                        <div style='font-size:15px;color:#1976d2;margin-top:2px;'>Estimated time left: ${estTimeStr}</div>
+                      </div>
+                    `;
+                  }
+                  inFlight--;
+                  if (finished === batch.length) return resolve();
+                  launchNext();
+                })();
+              }
+            }
+            launchNext();
+          });
+        checkResults = checkResults.concat(batchResults);
+      }
+      if (cancelled) {
+        setSandButtonDisabled(false);
+        return;
+      }
+      Swal.close();
+      // --- Map duplicate result กลับไปยัง logData เดิม ---
+      const duplicateKeySet = new Set(
+        checkResults.filter(r => r.type === 'duplicate').map(r => `${r.prd_item}__${r.proc_id}`)
+      );
+      const duplicateList = [];
+      const uniqueRecords = [];
+      logData.forEach(row => {
+        const key = `${row.prd_item}__${row.proc_id}`;
+        if (duplicateKeySet.has(key)) {
+          duplicateList.push(`${row.prd_item}, ${row.proc_id}, ${row.secpcs}`);
+        } else {
+          uniqueRecords.push(row);
+        }
+      });
+      const duplicateCount = duplicateList.length;
+      // แจ้งเตือนผลลัพธ์การเช็คซ้ำ
+      if (duplicateCount > 0) {
+        let displayList = duplicateList;
+        let truncated = false;
+        if (duplicateList.length > 4) {
+          displayList = duplicateList.slice(0, 4);
+          truncated = true;
+        }
+        await Swal.fire({
+          icon: 'warning',
+          title: `<div style='font-size:28px;font-weight:700;color:#333;'>Duplicate Data Found</div>`,
+          html: `
+            <div style='text-align:left;padding:8px 0 0 0;'>
+              <div style='font-size:18px;color:#1976d2;font-weight:600;margin-bottom:10px;'>Found <b>${duplicateCount}</b> duplicate records.</div>
+              <div style='font-size:16px;color:#333;margin-bottom:8px;'><b>Duplicate List:</b></div>
+              <div style='max-height:120px;overflow:auto;background:#fafdff;border-radius:8px;border:1px solid #e3f0ff;padding:8px 12px;margin-bottom:18px;'>
+                ${displayList.map(item => `<div style='font-size:15px;color:#e53935;padding:2px 0;'>${item}</div>`).join('')}
+                ${truncated ? `<div style='font-size:15px;color:#e53935;padding:2px 0;'>...</div>` : ''}
+              </div>
+              <div style='font-size:16px;color:#333;margin-bottom:0;'>Only non-duplicate records will be sent (${uniqueRecords.length} records).</div>
+            </div>
+          `,
+          confirmButtonText: '<span style="font-size:18px;font-weight:600;padding:4px 18px;">OK, Send Non-Duplicate</span>',
+          showCancelButton: false,
+          customClass: {
+            popup: 'swal2-dialog',
+            title: 'swal2-title',
+            htmlContainer: 'swal2-html-container',
+            confirmButton: 'swal2-confirm',
+          },
+          background: 'linear-gradient(135deg, #e3f0ff 0%, #fafdff 100%)',
+          width: 480,
+          padding: '32px 18px 24px 18px',
+          buttonsStyling: false,
+          showClass: { popup: 'swal2-show' },
+          hideClass: { popup: 'swal2-hide' }
+        });
+      }
+      // ส่งข้อมูลที่ไม่ซ้ำ (หรือทั้งหมดถ้าไม่มีซ้ำ)
+      const toInsert = duplicateCount > 0 ? uniqueRecords : logData;
+        if (toInsert.length > 0) {
+          setLoadingSandToData(true);
+          setLoadingPercent(0);
+          setLoadingLoaded(0);
+          const batchSize = 100;
+          for (let i = 0; i < toInsert.length; i += batchSize) {
+            if (sandToDataCancelRef.current) break;
+            const batch = toInsert.slice(i, i + batchSize);
+            await Promise.all(batch.map(async (rec) => {
+              try {
+                await axios.get('http://10.17.100.115:3005/api/smart_pcap_ora/insert-std-time-product-fix', { params: rec });
+              } catch (error) {}
+            }));
+            setLoadingLoaded(Math.min(i + batch.length, toInsert.length));
+            setLoadingPercent(Math.round((Math.min(i + batch.length, toInsert.length) / toInsert.length) * 100));
+          }
+          setLoadingSandToData(false);
+          await Swal.fire({
+            icon: 'success',
+            title: 'Insert Completed',
+            html: `<div style='font-size:18px;'>Successfully sent <b>${toInsert.length.toLocaleString()}</b> records.<br>Duplicate records were not inserted.</div>`,
+            confirmButtonColor: '#1976d2'
+          });
+          setLoadingPercent(0);
+          setLoadingLoaded(0);
+        } else {
+          await Swal.fire({
+            icon: 'info',
+            title: 'No Data to Insert',
+            html: `<div style='font-size:18px;'>No new records to insert.</div>`,
+            confirmButtonColor: '#1976d2'
+          });
+        }
+      }
+    });
+    setSandButtonDisabled(false);
+    // ...existing code for after process...
   };
+  // ...existing code...
   // Modern, beautiful background for the whole page
   const pageBg = {
     minHeight: '100vh',
@@ -554,7 +705,7 @@ export default function StandardTimeSimilarStructure() {
     let cancelTokenSource = axios.CancelToken.source();
     setExportCancelToken(cancelTokenSource);
     // 1. Get total count first (ก่อน setExporting)
-    let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+    let url = `http://10.17.100.115:3005/api/smart_pcap_ora/filter-data-similar-structure`;
     let paramsBase = {};
     if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
       paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
@@ -619,71 +770,112 @@ export default function StandardTimeSimilarStructure() {
         worksheet.addRow(["", "", "", "", "", "", "NO DATA"]);
         await Swal.fire({ icon: 'info', title: 'No Data', text: 'No data available for export.', confirmButtonColor: '#1976d2' });
       } else {
-        // 3. Fetch in chunks
-        const chunkSize = 20000;
-        let loaded = 0;
-        let allRows = [];
-        for (let pageIdx = 1; allRows.length < totalRows; pageIdx++) {
-          if (exportCancelToken && exportCancelToken.token.reason) {
-            setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
-            setExporting(false);
-            setExportCancelToken(null);
-            await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'Export has been cancelled.', confirmButtonColor: '#1976d2' });
-            return;
+        // --- fetch all data ---
+        let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
+        let params = {};
+        if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+          params = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
+        } else if (!selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+          params = { prd_name: 'ALL PRODUCT', proc_disp: selectedProcess.proc_disp };
+        } else if (selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
+          params = { prd_name: selectedProduct.prd_name, proc_disp: 'ALL PROCESS' };
+        } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
+          params = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
+        }
+        // 1. ดึงจำนวนทั้งหมดก่อน
+        let totalRows = 0;
+        try {
+          const res = await axios.get(url, { params: { ...params, page: 1, pageSize: 1 } });
+          if (res.data && typeof res.data.total === 'number') {
+            totalRows = res.data.total;
+          } else if (Array.isArray(res.data.rows)) {
+            totalRows = res.data.rows.length;
+          } else if (Array.isArray(res.data)) {
+            totalRows = res.data.length;
           }
-          let params = { ...paramsBase, page: pageIdx, pageSize: chunkSize };
-          let rows = [];
+        } catch (err) {
+          await Swal.fire({ icon: 'error', title: 'Error', text: 'Cannot fetch all data from server.', confirmButtonColor: '#1976d2' });
+          return;
+        }
+        if (!totalRows || totalRows === 0) {
+          await Swal.fire({ icon: 'info', title: 'No Data', text: 'No data to process.', confirmButtonColor: '#1976d2' });
+          return;
+        }
+        // 2. ดึงข้อมูลทุกหน้า (chunk) + update progress
+        let allRows = [];
+        const chunkSize = 20000;
+        let loadedCount = 0;
+        for (let pageIdx = 1; allRows.length < totalRows; pageIdx++) {
           try {
-            const res = await axios.get(url, { params, cancelToken: cancelTokenSource.token });
+            const res = await axios.get(url, { params: { ...params, page: pageIdx, pageSize: chunkSize } });
+            let rows = [];
             if (res.data && Array.isArray(res.data.rows)) {
               rows = res.data.rows;
-            } else if (Array.isArray(res.data) && res.data.length > 0) {
+            } else if (Array.isArray(res.data)) {
               rows = res.data;
             }
+            if (rows.length === 0) break;
+            allRows = allRows.concat(rows);
+            loadedCount = allRows.length;
+            // อัปเดต progress (optional: add Swal progress update here if needed)
           } catch (err) {
-            if (axios.isCancel(err)) {
-              setExportProgress({ percent: 0, loaded: allRows.length, total: totalRows, done: true, error: true, cancelled: true });
-              setExporting(false);
-              setExportCancelToken(null);
-              await Swal.fire({ icon: 'warning', title: 'Export Cancelled', text: 'Export has been cancelled.', confirmButtonColor: '#1976d2' });
-            } else {
-              setExportProgress({ percent: 100, loaded: allRows.length, total: totalRows, done: true, error: true });
-              setExporting(false);
-              setExportCancelToken(null);
-              await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'An error occurred while fetching data.', confirmButtonColor: '#1976d2' });
-            }
-            return;
+            break;
           }
-          if (!rows || rows.length === 0) break;
-          // Write each row to worksheet as soon as it's loaded
-          rows.forEach((row) => {
-            worksheet.addRow([
-              row.factory_desc || row.factory || "",
-              row.unit_desc || row.unit || "",
-              row.proc_disp || row.process || paramsBase.proc_disp || "",
-              row.prd_name || row.product || paramsBase.prd_name || "",
-              row.prd_item || row.item || "",
-              row.sec_pcs ?? row.sec_per_pcs ?? "",
-              row.similar_type || row.remark || "",
-            ]);
-          });
-          allRows = allRows.concat(rows);
-          // --- FIX: progress 100% เฉพาะเมื่อครบจริง ---
-          let percent = Math.floor((allRows.length / totalRows) * 100);
-          if (allRows.length < totalRows) {
-            percent = Math.min(percent, 99);
-          } else {
-            percent = 100;
-          }
-          setExportProgress({
-            percent,
-            loaded: allRows.length,
-            total: totalRows,
-            done: allRows.length === totalRows,
-            error: false
-          });
-          setProgressLoaded(allRows.length);
-          await new Promise((resolve) => setTimeout(resolve, 10)); // allow UI update
+        }
+        if (cancelled) {
+          return;
+        }
+        // ปิด Swal loading หลังโหลดข้อมูลครบ
+        // Prepare data for API ให้ตรงกับ backend (ใช้ allRows จริง)
+        const logData = allRows.map(row => ({
+          prd_item: row.prd_item || row.item || '',
+          proc_id: row.proc_id || '',
+          secpcs: row.sec_pcs ?? row.stdtime_secpcs ?? row.sec_per_pcs ?? '',
+          create_by: userEmpID || update_by || '',
+          update_by: userEmpID || update_by || '',
+          remark: row.remark || row.similar_type || '',
+        }));
+        // --- Fast duplicate check: parallel batch + update Swal progress ---
+        const batchSizeCheck = 1000;
+        let checkResults = [];
+        let checkedCount = 0;
+        let startTime = Date.now();
+        let totalChecked = 0;
+        for (let i = 0; i < logData.length; i += batchSizeCheck) {
+          if (cancelled) break;
+          const batch = logData.slice(i, i + batchSizeCheck);
+          let batchResults = new Array(batch.length);
+          await Promise.allSettled(
+            batch.map(async (record, j) => {
+              if (cancelled) return;
+              // ...duplicate check logic here...
+              checkedCount++;
+              totalChecked++;
+              // Calculate average time per record
+              let now = Date.now();
+              let elapsedMs = now - startTime;
+              let avgMsPerRecord = totalChecked > 0 ? elapsedMs / totalChecked : 0;
+              let remaining = logData.length - totalChecked;
+              let estMsLeft = Math.round(avgMsPerRecord * remaining);
+              // Format estimated time left as mm:ss
+              let estMin = Math.floor(estMsLeft / 60000);
+              let estSec = Math.floor((estMsLeft % 60000) / 1000);
+              let estTimeStr = `${estMin}:${estSec.toString().padStart(2, '0')} min`;
+              // Update progress text (show estimated time left)
+              const progressHtml = `
+                <div style='font-size:18px;color:#333;margin-top:8px;'>Checking for duplicate records...</div>
+                <div style='font-size:28px;font-weight:700;color:#1976d2;margin:8px 0 0 0;'>${checkedCount.toLocaleString()} <span style='font-size:22px;font-weight:400;color:#1976d2;'>/ ${logData.length.toLocaleString()}</span> <span style='font-size:16px;color:#333;font-weight:400;'>records</span></div>
+                <div style='font-size:17px;color:#1976d2;margin-top:6px;'>Estimated time left: ${estTimeStr}</div>
+              `;
+              const progressTextElem = document.getElementById('swal-progress-text');
+              if (progressTextElem) progressTextElem.innerHTML = progressHtml;
+            })
+          );
+          checkResults = checkResults.concat(batchResults);
+        }
+        if (cancelled) {
+          setSandButtonDisabled(false);
+          return;
         }
         // Success Swal after download
         // Data style
@@ -1111,6 +1303,19 @@ export default function StandardTimeSimilarStructure() {
                     variant="outlined"
                     size="medium"
                     style={{ width: 270, background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px 0 rgba(25,118,210,0.07)', border: '1.5px solid #e3eaf7' }}
+                    onFocus={() => {
+                      setProductOpen(true);
+                      // If ALL PRODUCT, trigger reload to show all options
+                      if (!productInput || productInput === 'ALL PRODUCT') {
+                        setProductInput('');
+                      }
+                    }}
+                    onClick={() => {
+                      setProductOpen(true);
+                      if (!productInput || productInput === 'ALL PRODUCT') {
+                        setProductInput('');
+                      }
+                    }}
                   />
                 )}
                 style={{ width: "100%" }}
@@ -1149,6 +1354,19 @@ export default function StandardTimeSimilarStructure() {
                     variant="outlined"
                     size="medium"
                     style={{ width: 270, background: '#fff', borderRadius: 10, boxShadow: '0 2px 8px 0 rgba(25,118,210,0.07)', border: '1.5px solid #e3eaf7' }}
+                    onFocus={() => {
+                      setProcessOpen(true);
+                      // If ALL PROCESS, trigger reload to show all options
+                      if (!processInput || processInput === 'ALL PROCESS') {
+                        setProcessInput('');
+                      }
+                    }}
+                    onClick={() => {
+                      setProcessOpen(true);
+                      if (!processInput || processInput === 'ALL PROCESS') {
+                        setProcessInput('');
+                      }
+                    }}
                   />
                 )}
                 style={{ width: "100%" }}
@@ -1665,7 +1883,7 @@ export default function StandardTimeSimilarStructure() {
           }}>
             <div style={{ margin: '18px 0 12px 0', width: '100%' }}>
               {/* Cute animated GIF for download */}
-              <img src="/download-folder.gif" alt="Downloading..." style={{
+              <img src="/download-folder.gif" alt="Downloading" style={{
                 width: 90,
                 height: 90,
                 marginBottom: 16,

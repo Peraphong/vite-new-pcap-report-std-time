@@ -3,7 +3,7 @@
 .home-bg {
   min-height: 100vh;
   width: 100vw;
-  background: radial-gradient(circle at 50% 0%, #e3f2fd 0%, #f5faff 60%, #ffffff 100%);
+  background: radial-gradient(circle at 50% 0%, #f6f7f8 0%, #f9fafb 60%, #ffffff 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,7 +21,7 @@
   border-radius: 28px;
   box-shadow: 0 8px 40px 0 rgba(33,150,243,0.13), 0 1.5px 8px 0 rgba(33,150,243,0.08);
   backdrop-filter: blur(12px) saturate(120%);
-  border: 1.5px solid #e3f2fd;
+  border: 1.5px solid #038cee95;
   padding: 32px 24px 18px 24px;
   text-align: center;
   animation: fadeInUp 0.7s cubic-bezier(.4,0,.2,1);
@@ -54,7 +54,7 @@
 .home-menu-card-glass {
   background: rgba(255,255,255,0.97);
   border-radius: 26px;
-  box-shadow: 0 6px 32px 0 rgba(33,150,243,0.13), 0 1.5px 8px 0 rgba(33,150,243,0.08);
+  box-shadow: 0 6px 32px 0 rgba(30,30,30,0.13), 0 1.5px 8px 0 rgba(30,30,30,0.08);
   padding: 32px 24px 24px 24px;
   border: 1.5px solid #e3f2fd;
   backdrop-filter: blur(10px) saturate(120%);
@@ -72,7 +72,7 @@
   backdrop-filter: blur(10px);
 }
 .home-menu-card-glass:hover {
-  box-shadow: 0 16px 48px 0 rgba(25,118,210,0.18);
+  box-shadow: 0 16px 10px 0 rgb(30, 30, 30);
   transform: translateY(-8px) scale(1.045);
   border: 2px solid #1976d2;
   background: rgba(255,255,255,0.85);
