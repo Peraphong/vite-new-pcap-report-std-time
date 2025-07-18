@@ -37,7 +37,7 @@ function Login() {
           Swal.fire({
             icon: "success",
             title: "Login Success",
-            text: "Welcome to SUS Plate Management",
+            text: "WELCOME TO SMART STANDARD TIME MANAGEMENT",
           });
           navigate("/home");
         } else {

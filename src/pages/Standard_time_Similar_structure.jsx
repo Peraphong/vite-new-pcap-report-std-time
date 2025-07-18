@@ -113,6 +113,9 @@ export default function StandardTimeSimilarStructure() {
   const progressAnimFrom = useRef(0);
   const progressAnimTimer = useRef(null);
 
+  // Ref for export cancel token
+  const exportCancelTokenRef = useRef(null);
+
   // -------------------- Effect --------------------
 
   // Animate progress bar: วิ่งจากค่าเดิมไปเป้าหมายใหม่ในเวลาที่กำหนด
@@ -702,10 +705,9 @@ export default function StandardTimeSimilarStructure() {
       });
       return;
     }
-    let cancelTokenSource = axios.CancelToken.source();
-    setExportCancelToken(cancelTokenSource);
+    exportCancelTokenRef.current = axios.CancelToken.source();
     // 1. Get total count first (ก่อน setExporting)
-    let url = `http://10.17.100.115:3005/api/smart_pcap_ora/filter-data-similar-structure`;
+    let url = `http://10.17.100.115:3001/api/smart_pcap/filter-data-similar-structure`;
     let paramsBase = {};
     if (!selectedProduct?.prd_name && !selectedProcess?.proc_disp) {
       paramsBase = { prd_name: 'ALL PRODUCT', proc_disp: 'ALL PROCESS' };
@@ -718,11 +720,14 @@ export default function StandardTimeSimilarStructure() {
     }
     let totalRows = 0;
     try {
-      const res = await axios.get(url, { params: { ...paramsBase, page: 1, pageSize: 1 }, cancelToken: cancelTokenSource.token });
+      const res = await axios.get(url, { params: { ...paramsBase, page: 1, pageSize: 1 }, cancelToken: exportCancelTokenRef.current.token });
+      // รองรับ response หลายรูปแบบ
       if (res.data && typeof res.data.total === 'number') {
         totalRows = res.data.total;
       } else if (Array.isArray(res.data.rows)) {
         totalRows = res.data.rows.length;
+      } else if (Array.isArray(res.data.data)) {
+        totalRows = res.data.data.length;
       } else if (Array.isArray(res.data)) {
         totalRows = res.data.length;
       }
@@ -782,100 +787,46 @@ export default function StandardTimeSimilarStructure() {
         } else if (selectedProduct?.prd_name && selectedProcess?.proc_disp) {
           params = { prd_name: selectedProduct.prd_name, proc_disp: selectedProcess.proc_disp };
         }
-        // 1. ดึงจำนวนทั้งหมดก่อน
-        let totalRows = 0;
-        try {
-          const res = await axios.get(url, { params: { ...params, page: 1, pageSize: 1 } });
-          if (res.data && typeof res.data.total === 'number') {
-            totalRows = res.data.total;
-          } else if (Array.isArray(res.data.rows)) {
-            totalRows = res.data.rows.length;
-          } else if (Array.isArray(res.data)) {
-            totalRows = res.data.length;
-          }
-        } catch (err) {
-          await Swal.fire({ icon: 'error', title: 'Error', text: 'Cannot fetch all data from server.', confirmButtonColor: '#1976d2' });
-          return;
-        }
-        if (!totalRows || totalRows === 0) {
-          await Swal.fire({ icon: 'info', title: 'No Data', text: 'No data to process.', confirmButtonColor: '#1976d2' });
-          return;
-        }
         // 2. ดึงข้อมูลทุกหน้า (chunk) + update progress
         let allRows = [];
         const chunkSize = 20000;
-        let loadedCount = 0;
         for (let pageIdx = 1; allRows.length < totalRows; pageIdx++) {
+          // ไม่ต้องเช็ค exportCancelToken.token.reason ตรงนี้ เพราะ axios จะ throw catch ให้อยู่แล้ว
           try {
-            const res = await axios.get(url, { params: { ...params, page: pageIdx, pageSize: chunkSize } });
+            const res = await axios.get(url, {
+              params: { ...params, page: pageIdx, pageSize: chunkSize },
+              cancelToken: exportCancelTokenRef.current.token
+            });
             let rows = [];
+            // รองรับ response หลายรูปแบบ
             if (res.data && Array.isArray(res.data.rows)) {
               rows = res.data.rows;
+            } else if (Array.isArray(res.data.data)) {
+              rows = res.data.data;
             } else if (Array.isArray(res.data)) {
               rows = res.data;
             }
             if (rows.length === 0) break;
             allRows = allRows.concat(rows);
-            loadedCount = allRows.length;
-            // อัปเดต progress (optional: add Swal progress update here if needed)
+            // อัปเดต progress bar ตามจำนวน row ที่โหลดจริง
+            setExportProgress({
+              percent: Math.round((allRows.length / totalRows) * 100),
+              loaded: allRows.length,
+              total: totalRows,
+              done: false,
+              error: false
+            });
           } catch (err) {
+            // ถ้าโดน cancel จะเข้า catch ทันที
+            if (axios.isCancel(err)) {
+              setExportProgress({ percent: 100, loaded: allRows.length, total: totalRows, done: true, error: true });
+              setExporting(false);
+              exportCancelTokenRef.current = null;
+              await Swal.fire({ icon: 'info', title: 'Canceled', text: 'Export has been canceled.', confirmButtonColor: '#1976d2' });
+              return;
+            }
             break;
           }
-        }
-        if (cancelled) {
-          return;
-        }
-        // ปิด Swal loading หลังโหลดข้อมูลครบ
-        // Prepare data for API ให้ตรงกับ backend (ใช้ allRows จริง)
-        const logData = allRows.map(row => ({
-          prd_item: row.prd_item || row.item || '',
-          proc_id: row.proc_id || '',
-          secpcs: row.sec_pcs ?? row.stdtime_secpcs ?? row.sec_per_pcs ?? '',
-          create_by: userEmpID || update_by || '',
-          update_by: userEmpID || update_by || '',
-          remark: row.remark || row.similar_type || '',
-        }));
-        // --- Fast duplicate check: parallel batch + update Swal progress ---
-        const batchSizeCheck = 1000;
-        let checkResults = [];
-        let checkedCount = 0;
-        let startTime = Date.now();
-        let totalChecked = 0;
-        for (let i = 0; i < logData.length; i += batchSizeCheck) {
-          if (cancelled) break;
-          const batch = logData.slice(i, i + batchSizeCheck);
-          let batchResults = new Array(batch.length);
-          await Promise.allSettled(
-            batch.map(async (record, j) => {
-              if (cancelled) return;
-              // ...duplicate check logic here...
-              checkedCount++;
-              totalChecked++;
-              // Calculate average time per record
-              let now = Date.now();
-              let elapsedMs = now - startTime;
-              let avgMsPerRecord = totalChecked > 0 ? elapsedMs / totalChecked : 0;
-              let remaining = logData.length - totalChecked;
-              let estMsLeft = Math.round(avgMsPerRecord * remaining);
-              // Format estimated time left as mm:ss
-              let estMin = Math.floor(estMsLeft / 60000);
-              let estSec = Math.floor((estMsLeft % 60000) / 1000);
-              let estTimeStr = `${estMin}:${estSec.toString().padStart(2, '0')} min`;
-              // Update progress text (show estimated time left)
-              const progressHtml = `
-                <div style='font-size:18px;color:#333;margin-top:8px;'>Checking for duplicate records...</div>
-                <div style='font-size:28px;font-weight:700;color:#1976d2;margin:8px 0 0 0;'>${checkedCount.toLocaleString()} <span style='font-size:22px;font-weight:400;color:#1976d2;'>/ ${logData.length.toLocaleString()}</span> <span style='font-size:16px;color:#333;font-weight:400;'>records</span></div>
-                <div style='font-size:17px;color:#1976d2;margin-top:6px;'>Estimated time left: ${estTimeStr}</div>
-              `;
-              const progressTextElem = document.getElementById('swal-progress-text');
-              if (progressTextElem) progressTextElem.innerHTML = progressHtml;
-            })
-          );
-          checkResults = checkResults.concat(batchResults);
-        }
-        if (cancelled) {
-          setSandButtonDisabled(false);
-          return;
         }
         // Success Swal after download
         // Data style
@@ -900,13 +851,25 @@ export default function StandardTimeSimilarStructure() {
         worksheet.columns.forEach((column, idx) => {
           if (idx !== 6) column.width = 18;
         });
+        // ใส่ข้อมูลลง worksheet
+        allRows.forEach(row => {
+          worksheet.addRow([
+            row.factory_desc || row.factory || "",
+            row.unit_desc || row.unit || "",
+            row.proc_disp || row.process || params.proc_disp || "",
+            row.prd_name || row.product || params.prd_name || "",
+            row.prd_item || row.item || "",
+            row.sec_pcs ?? row.sec_per_pcs ?? "",
+            row.similar_type || row.remark || "",
+          ]);
+        });
         // Download
         const buf = await workbook.xlsx.writeBuffer();
         saveAs(new Blob([buf]), "StandardTimeSimilarStructure.xlsx");
         // ปิด dialog exporting ทันทีหลังโหลดเสร็จ
         setExportProgress({ percent: 100, loaded: totalRows, total: totalRows, done: true, error: false });
         setExporting(false);
-        setExportCancelToken(null);
+        exportCancelTokenRef.current = null;
         await Swal.fire({ icon: 'success', title: 'Export Completed', text: 'Excel file saved successfully.', confirmButtonColor: '#1976d2' });
       }
     } catch {
@@ -914,12 +877,12 @@ export default function StandardTimeSimilarStructure() {
       await Swal.fire({ icon: 'error', title: 'Export Failed', text: 'An error occurred during export.', confirmButtonColor: '#1976d2' });
     }
     setExporting(false);
-    setExportCancelToken(null);
+    exportCancelTokenRef.current = null;
   };
 
   const handleCancelExport = () => {
-    if (exportCancelToken) {
-      exportCancelToken.cancel('Export cancelled by user');
+    if (exportCancelTokenRef.current) {
+      exportCancelTokenRef.current.cancel('Export cancelled by user');
     }
   };
 
